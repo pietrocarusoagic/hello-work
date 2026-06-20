@@ -45,7 +45,7 @@ A single **Azure Front Door Standard** instance with an attached **WAF policy** 
 | Storage | Azure Blob Storage (avatars, assets) |
 | Maps | Azure Maps Gen 2 S0 (Office Map) |
 | Ingress / WAF | Azure Front Door Standard + WAF Policy |
-| IaC | Azure Bicep |
+| IaC | Terraform |
 | CI/CD | GitHub Actions |
 | Monitoring | Application Insights + Log Analytics Workspace |
 
@@ -506,29 +506,36 @@ No secrets are stored in environment variables, application configuration files,
 
 ## 6. Deployment and Automation
 
-### 6.1 Azure Bicep Structure
+### 6.1 Terraform Structure
 
-Infrastructure is fully codified in Azure Bicep. Remote state is managed natively by Azure Resource Manager — no additional state storage is required. Deployments are idempotent.
+Infrastructure is fully codified in Terraform using the `azurerm` provider. Remote state is stored in an **Azure Storage Account** (pre-created manually, outside the main resource group) with blob lease-based state locking — no external locking backend required.
 
 ```
 infra/
-├── main.bicep                    # Main orchestrator — provider config, resource group scope
-├── params.json                   # Default parameter values (no secrets)
-├── params.example.json           # Documented example (checked into source control)
+├── main.tf                        # Provider config, backend block, resource group
+├── variables.tf                   # Input variable declarations
+├── outputs.tf                     # Output values (FQDNs, ACR login server, etc.)
+├── terraform.tfvars.example       # Documented example variable file (no secrets, checked in)
 │
-└── modules/
-    ├── networking.bicep           # VNet, subnets, NSGs
-    ├── frontdoor.bicep            # Front Door profile, endpoint, origin groups,
-    │                              #   routing rules, WAF policy
-    ├── container-apps.bicep       # Container Apps Environment + Container App
-    ├── container-registry.bicep   # ACR + role assignments
-    ├── postgresql.bicep           # Flexible Server, delegated subnet, DB
-    ├── blob-storage.bicep         # Storage Account, containers, private endpoint
-    ├── maps.bicep                 # Azure Maps resource
-    ├── openai.bicep               # Azure OpenAI resource + GPT-4o model deployment
-    ├── keyvault.bicep             # Key Vault, private endpoint, secrets
-    └── monitoring.bicep           # Application Insights + Log Analytics Workspace
+├── modules/
+│   ├── networking/                # VNet, subnets, NSGs
+│   ├── frontdoor/                 # Front Door profile, endpoint, origin groups,
+│   │                              #   routing rules, WAF policy
+│   ├── container_apps/            # Container Apps Environment + Container App
+│   ├── container_registry/        # ACR + role assignments
+│   ├── postgresql/                # Flexible Server, delegated subnet, DB
+│   ├── blob_storage/              # Storage Account, containers, private endpoint
+│   ├── maps/                      # Azure Maps resource
+│   ├── openai/                    # Azure OpenAI resource + GPT-4o model deployment
+│   ├── keyvault/                  # Key Vault, private endpoint, secrets
+│   └── monitoring/                # Application Insights + Log Analytics Workspace
+│
+└── environments/
+    ├── dev.tfvars                 # Development variable overrides
+    └── prod.tfvars                # Production variable overrides
 ```
+
+Terraform workspaces or separate `.tfvars` files (`dev.tfvars`, `prod.tfvars`) isolate variable values between environment configurations while sharing the same physical infrastructure.
 
 ### 6.2 GitHub Actions Pipelines
 
@@ -542,9 +549,10 @@ trigger: push to main (infra/**)
 steps:
   1. Checkout repository
   2. Azure login via OIDC (Workload Identity Federation — no long-lived secrets)
-  3. az bicep build          (compile and validate all modules)
-  4. az deployment group what-if   (preview changes — output as artifact)
-  5. az deployment group create    (apply — main branch only)
+  3. terraform init        (backend: Azure Storage Account with blob state locking)
+  4. terraform validate
+  5. terraform plan        (output saved as pipeline artifact for review)
+  6. terraform apply -auto-approve   (main branch only)
 ```
 
 **Pipeline 2 — Backend API (`api-deploy.yml`)**
@@ -692,7 +700,7 @@ Azure Blob Storage (LRS) does not replicate to a second region (acceptable for P
 Container Apps runs on Azure's managed infrastructure with built-in replica restart on crash. In a full-region failure scenario:
 
 1. The latest Docker image is already present in ACR from the last CI/CD run
-2. Re-run `az deployment group create` targeting an alternative region
+  2. Re-run `terraform apply -var-file=prod.tfvars` targeting an alternative region
 3. Update the Static Web App linked backend URL and the Front Door origin FQDN
 
 Estimated time: 15–25 minutes, within the 30-minute RTO.
