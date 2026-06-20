@@ -25,3 +25,17 @@ desktop.ini
 
 # Logs
 *.log
+/.github/workflows/ci-cd.yml
+/frontend/.vite/deps/_metadata.json
+/frontend/.vite/deps/package.json
+/frontend/.vite/deps_temp_1a1a86f6/chunk-6V75OSAC.js
+/frontend/.vite/deps_temp_1a1a86f6/chunk-6V75OSAC.js.map
+/frontend/.vite/deps_temp_1a1a86f6/package.json
+/frontend/.vite/deps_temp_1a1a86f6/react-dom.js
+/frontend/.vite/deps_temp_1a1a86f6/react-dom.js.map
+/frontend/.vite/deps_temp_1a1a86f6/react.js
+/frontend/.vite/deps_temp_1a1a86f6/react.js.map
+/frontend/.vite/deps_temp_1a1a86f6/react_jsx-dev-runtime.js
+/frontend/.vite/deps_temp_1a1a86f6/react_jsx-dev-runtime.js.map
+/frontend/.vite/deps_temp_1a1a86f6/react_jsx-runtime.js
+/frontend/.vite/deps_temp_1a1a86f6/react_jsx-runtime.js.map
