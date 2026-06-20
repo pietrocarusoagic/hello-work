@@ -91,7 +91,7 @@ module "frontdoor" {
 
   # Prevention mode: blocks matched requests rather than just logging.
   waf = {
-    name = "wafpol-hellowork"
+    name = "wafpolhellowork"
     mode = "Prevention"
     managed_rules = [
       {
