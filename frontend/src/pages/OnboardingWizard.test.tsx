@@ -34,16 +34,18 @@ beforeEach(() => {
 describe('OnboardingWizard', () => {
   it('renders step 1 (Chi sei) on mount', () => {
     renderWizard()
-    expect(screen.getByText('Chi sei')).toBeTruthy()
+    // Use heading role to distinguish from progress-bar span labels
+    expect(screen.getByRole('heading', { name: 'Chi sei' })).toBeTruthy()
     expect(screen.getByPlaceholderText('es. Software Engineer')).toBeTruthy()
     expect(screen.getByText('1 / 4')).toBeTruthy()
   })
 
   it('"Salta" advances to the next step', () => {
     renderWizard()
-    const skipBtn = screen.getByText('Salta')
+    const skipBtn = screen.getByRole('button', { name: 'Salta' })
     fireEvent.click(skipBtn)
-    expect(screen.getByText('Competenze')).toBeTruthy()
+    // step 1 has both <h2>Competenze</h2> and a ProfilePillar <h3>Competenze</h3>
+    expect(screen.getByRole('heading', { name: 'Competenze', level: 2 })).toBeTruthy()
     expect(screen.getByText('2 / 4')).toBeTruthy()
   })
 
@@ -51,12 +53,12 @@ describe('OnboardingWizard', () => {
     renderWizard()
 
     // Step 1 → 2 → 3 → 4
-    fireEvent.click(screen.getByText('Salta'))
-    fireEvent.click(screen.getByText('Salta'))
-    fireEvent.click(screen.getByText('Salta'))
+    fireEvent.click(screen.getByRole('button', { name: 'Salta' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Salta' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Salta' }))
 
     // Now on step 4 — click Salta to complete
-    fireEvent.click(screen.getByText('Salta'))
+    fireEvent.click(screen.getByRole('button', { name: 'Salta' }))
 
     await waitFor(() => {
       expect(api.put).toHaveBeenCalledWith('/profiles/me', expect.objectContaining({
@@ -71,17 +73,17 @@ describe('OnboardingWizard', () => {
 
   it('"Avanti →" button also advances steps', () => {
     renderWizard()
-    const nextBtn = screen.getByText('Avanti →')
+    const nextBtn = screen.getByRole('button', { name: 'Avanti →' })
     fireEvent.click(nextBtn)
-    expect(screen.getByText('Competenze')).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Competenze', level: 2 })).toBeTruthy()
   })
 
   it('shows "Completa ✓" on the last step', () => {
     renderWizard()
     // Skip to last step
-    fireEvent.click(screen.getByText('Salta'))
-    fireEvent.click(screen.getByText('Salta'))
-    fireEvent.click(screen.getByText('Salta'))
-    expect(screen.getByText('Completa ✓')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Salta' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Salta' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Salta' }))
+    expect(screen.getByRole('button', { name: 'Completa ✓' })).toBeTruthy()
   })
 })
