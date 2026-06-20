@@ -1,0 +1,79 @@
+name: Infrastructure Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/**"
+  workflow_dispatch: # Allow manual trigger for initial bootstrap
+
+permissions:
+  id-token: write   # Required for OIDC token acquisition
+  contents: read
+
+env:
+  TF_WORKING_DIR: infra
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }} # GitHub Actions service principal (OIDC)
+  ARM_USE_OIDC: "true"
+
+jobs:
+  terraform:
+    name: Terraform Plan & Apply
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC — no long-lived secrets)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.10"
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform plan \
+            -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" \
+            -var="sql_admin_password=${{ secrets.SQL_ADMIN_PASSWORD }}" \
+            -var="github_actions_sp_object_id=${{ secrets.GH_SP_OBJECT_ID }}" \
+            -var="aad_tenant_id=${{ secrets.ARM_TENANT_ID }}" \
+            -var="aad_client_id=${{ secrets.AAD_CLIENT_ID }}" \
+            -var="alert_email=${{ secrets.ALERT_EMAIL }}" \
+            -var-file=environments/prod.tfvars \
+            -out=tfplan
+        env:
+          # Backend state storage — pre-created, not managed by this stack
+          ARM_ACCESS_KEY: ${{ secrets.TF_STATE_STORAGE_KEY }}
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ github.sha }}
+          path: ${{ env.TF_WORKING_DIR }}/tfplan
+          retention-days: 7
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve tfplan
+        env:
+          ARM_ACCESS_KEY: ${{ secrets.TF_STATE_STORAGE_KEY }}
