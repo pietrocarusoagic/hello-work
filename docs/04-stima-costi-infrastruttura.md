@@ -490,7 +490,7 @@ Prima del go-live in produzione, verificare che siano attivi:
 
 ---
 
-*AGIC — Giugno 2026*  
+*Team Red — Giugno 2026*  
 *Revisione FinOps v2.0 — 20 giugno 2026*
 ```
 

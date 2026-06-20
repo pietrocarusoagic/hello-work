@@ -38,23 +38,23 @@ export default function Profile() {
     }
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-agic-dark text-gray-400 dark:text-white/40 text-sm">Caricamento...</div>
+  if (loading) return <div className="min-h-screen bg-agic-dark flex items-center justify-center text-white/40 text-sm">Caricamento...</div>
   if (!profile) return null
 
   return (
-    <div className="min-h-screen bg-white dark:bg-agic-dark pb-20 md:pt-20 max-w-2xl mx-auto px-4 py-6">
-      <div className="card-2xl shadow-sm p-6 mb-4 flex items-center gap-4">
+    <div className="min-h-screen bg-agic-dark pb-20 md:pt-20 max-w-2xl mx-auto px-4 py-6">
+      <div className="bg-agic-card rounded-2xl border border-agic-border p-6 mb-4 flex items-center gap-4">
         {profile.avatarUrl ? (
           <img src={profile.avatarUrl} alt={profile.displayName} className="w-20 h-20 rounded-full object-cover" />
         ) : (
-          <div className="w-20 h-20 rounded-full gradient-bg flex items-center justify-center text-3xl font-bold text-white">
+          <div className="w-20 h-20 rounded-full bg-agic-primary/20 flex items-center justify-center text-3xl font-bold text-agic-primary">
             {profile.displayName.charAt(0)}
           </div>
         )}
         <div>
-          <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">{profile.displayName}</h1>
-          <p className="text-gray-500 dark:text-white/50 text-sm">{profile.role} {profile.department ? `— ${profile.department}` : ''}</p>
-          <p className="text-gray-400 dark:text-white/30 text-xs">{profile.officeLocation}</p>
+          <h1 className="text-xl font-bold text-white">{profile.displayName}</h1>
+          <p className="text-white/50 text-sm">{profile.role} {profile.department ? `— ${profile.department}` : ''}</p>
+          <p className="text-white/30 text-xs">{profile.officeLocation}</p>
         </div>
       </div>
 
@@ -100,7 +100,7 @@ export default function Profile() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="mt-6 w-full gradient-bg hover:opacity-90 text-white font-semibold py-3 rounded-xl transition-opacity disabled:opacity-50 shadow-lg"
+          className="mt-6 w-full bg-gradient-agic hover:opacity-90 text-white font-semibold py-3 rounded-xl transition-opacity disabled:opacity-50"
         >
           {saved ? '✅ Salvato!' : saving ? 'Salvataggio…' : 'Salva Profilo'}
         </button>

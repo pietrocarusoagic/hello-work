@@ -8,8 +8,9 @@ import Profile from './pages/Profile'
 import WorkMatch from './pages/WorkMatch'
 import Groups from './pages/Groups'
 import Map from './pages/Map'
+import OnboardingWizard from './pages/OnboardingWizard'
 import NavBar from './components/NavBar'
-import { api } from './lib/api'
+import { api, UserProfile } from './lib/api'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const msalAuth = useIsAuthenticated()
@@ -17,10 +18,20 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 
+function needsOnboarding(profile: UserProfile): boolean {
+  if (profile.profileScore < 30) return true
+  return (
+    profile.skills.length === 0 &&
+    profile.aiTools.length === 0 &&
+    profile.hobbies.length === 0
+  )
+}
+
 export default function App() {
   const msalAuth = useIsAuthenticated()
   const isAuthenticated = DEV_BYPASS || msalAuth
   const [bootstrapping, setBootstrapping] = useState(false)
+  const [redirectOnboarding, setRedirectOnboarding] = useState(false)
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -30,6 +41,12 @@ export default function App() {
     let active = true
     setBootstrapping(true)
     api.post('/auth/me', {})
+      .then(() => api.get<UserProfile>('/profiles/me'))
+      .then((profile) => {
+        if (active && needsOnboarding(profile)) {
+          setRedirectOnboarding(true)
+        }
+      })
       .catch(console.error)
       .finally(() => { if (active) setBootstrapping(false) })
     return () => { active = false }
@@ -48,7 +65,15 @@ export default function App() {
       {isAuthenticated && <NavBar />}
       <Routes>
         <Route path="/login" element={DEV_BYPASS ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              {redirectOnboarding ? <Navigate to="/onboarding" replace /> : <Home />}
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/onboarding" element={<ProtectedRoute><OnboardingWizard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/workmatch" element={<ProtectedRoute><WorkMatch /></ProtectedRoute>} />

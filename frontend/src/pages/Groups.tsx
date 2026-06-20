@@ -39,46 +39,44 @@ export default function Groups() {
     finally { setCreating(false) }
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-agic-dark text-gray-400 dark:text-white/40 text-sm">Caricamento...</div>
+  if (loading) return <div className="min-h-screen bg-agic-dark flex items-center justify-center text-white/40 text-sm">Caricamento...</div>
 
   const suggested = groups.filter((g) => g.isSystemSuggested)
   const myGroups = groups.filter((g) => g.isMember)
   const allOther = groups.filter((g) => !g.isSystemSuggested && !g.isMember)
 
   return (
-    <div className="min-h-screen bg-white dark:bg-agic-dark pb-20 md:pt-20 max-w-2xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-agic-dark pb-20 md:pt-20 max-w-2xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-          Gruppi <span className="gradient-text">👥</span>
-        </h1>
+        <h1 className="text-2xl font-bold text-white">Gruppi 👥</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+          className="px-4 py-2 bg-gradient-agic text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
         >
           + Nuovo
         </button>
       </div>
 
       {showForm && (
-        <div className="card p-4 shadow-sm mb-6">
-          <h3 className="font-semibold mb-3 text-gray-700 dark:text-white/70">Crea un nuovo gruppo</h3>
+        <div className="bg-agic-card rounded-xl p-4 border border-agic-border mb-6">
+          <h3 className="font-semibold mb-3 text-white">Crea un nuovo gruppo</h3>
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Nome del gruppo"
-            className="w-full border border-gray-200 dark:border-agic-border rounded-lg px-3 py-2 text-sm mb-2 bg-white dark:bg-agic-dark text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-agic-primary/40 transition-colors"
+            className="w-full bg-agic-dark border border-agic-border rounded-lg px-3 py-2 text-sm mb-2 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-agic-primary/40"
           />
           <textarea
             value={newDesc}
             onChange={(e) => setNewDesc(e.target.value)}
             placeholder="Descrizione (opzionale)"
             rows={2}
-            className="w-full border border-gray-200 dark:border-agic-border rounded-lg px-3 py-2 text-sm mb-3 bg-white dark:bg-agic-dark text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-agic-primary/40 resize-none transition-colors"
+            className="w-full bg-agic-dark border border-agic-border rounded-lg px-3 py-2 text-sm mb-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-agic-primary/40 resize-none"
           />
           <button
             onClick={handleCreate}
             disabled={creating}
-            className="w-full gradient-bg text-white py-2 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+            className="w-full bg-gradient-agic text-white py-2 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
           >
             {creating ? 'Creazione…' : 'Crea Gruppo'}
           </button>
@@ -87,7 +85,7 @@ export default function Groups() {
 
       {suggested.length > 0 && (
         <section className="mb-6">
-          <h2 className="font-semibold text-gray-500 dark:text-white/40 text-xs uppercase tracking-wide mb-3">💡 Suggeriti per te</h2>
+          <h2 className="font-semibold text-white/40 text-xs uppercase tracking-wider mb-3">💡 Suggeriti per te</h2>
           <div className="space-y-3">
             {suggested.map((g) => <GroupCard key={g.id} group={g} onToggle={handleJoin} />)}
           </div>
@@ -96,7 +94,7 @@ export default function Groups() {
 
       {myGroups.length > 0 && (
         <section className="mb-6">
-          <h2 className="font-semibold text-gray-500 dark:text-white/40 text-xs uppercase tracking-wide mb-3">✅ I tuoi gruppi</h2>
+          <h2 className="font-semibold text-white/40 text-xs uppercase tracking-wider mb-3">✅ I tuoi gruppi</h2>
           <div className="space-y-3">
             {myGroups.map((g) => <GroupCard key={g.id} group={g} onToggle={handleJoin} />)}
           </div>
@@ -105,7 +103,7 @@ export default function Groups() {
 
       {allOther.length > 0 && (
         <section>
-          <h2 className="font-semibold text-gray-500 dark:text-white/40 text-xs uppercase tracking-wide mb-3">🔍 Tutti i gruppi</h2>
+          <h2 className="font-semibold text-white/40 text-xs uppercase tracking-wider mb-3">🔍 Tutti i gruppi</h2>
           <div className="space-y-3">
             {allOther.map((g) => <GroupCard key={g.id} group={g} onToggle={handleJoin} />)}
           </div>
@@ -117,20 +115,18 @@ export default function Groups() {
 
 function GroupCard({ group, onToggle }: { group: Group; onToggle: (id: string, isMember: boolean) => void }) {
   return (
-    <div className="card p-4 shadow-sm hover:border-agic-secondary/40 transition-all duration-200">
+    <div className="bg-agic-card rounded-xl p-4 border border-agic-border">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-gray-800 dark:text-white text-sm">{group.name}</h3>
-            {group.isSystemSuggested && (
-              <span className="text-xs px-1.5 py-0.5 bg-agic-secondary/10 text-agic-secondary rounded-full">AI</span>
-            )}
+            <h3 className="font-semibold text-white text-sm">{group.name}</h3>
+            {group.isSystemSuggested && <span className="text-xs px-1.5 py-0.5 bg-agic-secondary/20 text-agic-secondary rounded-full border border-agic-secondary/30">AI</span>}
           </div>
-          <p className="text-xs text-gray-500 dark:text-white/50 mt-0.5">{group.description}</p>
-          <p className="text-xs text-gray-400 dark:text-white/30 mt-1">👥 {group.memberCount} membri</p>
+          <p className="text-xs text-white/40 mt-0.5">{group.description}</p>
+          <p className="text-xs text-white/30 mt-1">👥 {group.memberCount} membri</p>
           <div className="flex flex-wrap gap-1 mt-2">
             {group.tags.slice(0, 3).map((t) => (
-              <span key={t} className="px-1.5 py-0.5 bg-gray-100 dark:bg-agic-border text-gray-600 dark:text-white/50 rounded-full text-xs">{t}</span>
+              <span key={t} className="px-1.5 py-0.5 bg-white/5 text-white/50 rounded-full text-xs border border-agic-border">{t}</span>
             ))}
           </div>
         </div>
@@ -138,8 +134,8 @@ function GroupCard({ group, onToggle }: { group: Group; onToggle: (id: string, i
           onClick={() => onToggle(group.id, group.isMember)}
           className={`ml-3 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
             group.isMember
-              ? 'bg-gray-100 dark:bg-agic-border text-gray-600 dark:text-white/60 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600'
-              : 'gradient-bg text-white hover:opacity-90'
+              ? 'bg-white/10 text-white/60 hover:bg-red-500/20 hover:text-red-400 border border-agic-border'
+              : 'bg-gradient-agic text-white hover:opacity-90'
           }`}
         >
           {group.isMember ? 'Esci' : 'Unisciti'}
