@@ -461,7 +461,7 @@ Mese 6   │ Go-live v1.0 · Hypercare · Planning v2.0
 
 ---
 
-*Prodotto da: Team Hello Work — AGIC · 20 Giugno 2026*
+*Prodotto da: Team Red · 20 Giugno 2026*
 
 ---
 
@@ -638,7 +638,7 @@ Per attribuire parzialmente il miglioramento degli indicatori organizzativi alla
 
 | Voce | Importo stimato | Riferimento |
 |------|:--------------:|-------------|
-| Sviluppo MVP (557 GU × tariffa media AGIC) | Da offerta commerciale | Sezione §10 + Offerta |
+| Sviluppo MVP (557 GU × tariffa media Team Red) | Da offerta commerciale | Sezione §10 + Offerta |
 | Infrastruttura Azure annua (scenario centrale) | ~€8.100/anno | Stima costi infrastruttura |
 | **Payback period indicativo** | **< 12 mesi** *(scenario centrale, se adozione raggiunta)* | Condizionato alle assunzioni §7.1 |
 
