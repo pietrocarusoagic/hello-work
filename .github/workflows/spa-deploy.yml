@@ -48,9 +48,9 @@ jobs:
       - name: Build (Vite)
         working-directory: frontend
         run: npm run build
-        env:
-          # Injected at build time so the SPA knows the API base URL via Front Door
-          VITE_API_BASE_URL: ${{ secrets.FRONT_DOOR_ENDPOINT_URL }}
+        # No VITE_API_BASE_URL needed — the SPA uses a relative /api path
+        # (see frontend/src/lib/api.ts). Front Door routes /api/* to the
+        # Container App on the same hostname, so no absolute URL is required.
 
       - name: Azure Login (OIDC — no long-lived secrets)
         uses: azure/login@v2

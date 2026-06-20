@@ -18,6 +18,10 @@ terraform {
     storage_account_name = "sthelloworktfstate"
     container_name       = "tfstate"
     key                  = "hellowork.tfstate"
+    # Authenticate using the same OIDC credentials as the provider.
+    # No storage account key required — the GitHub Actions SP needs
+    # Storage Blob Data Contributor on sthelloworktfstate (one-time manual grant).
+    use_oidc = true
   }
 }
 
