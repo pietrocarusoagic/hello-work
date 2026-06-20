@@ -27,17 +27,17 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-400 text-sm">Caricamento...</div>
+      <div className="min-h-screen bg-agic-dark flex items-center justify-center">
+        <div className="text-white/40 text-sm">Caricamento...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen pb-20 md:pt-20 max-w-2xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-agic-dark pb-20 md:pt-20 max-w-2xl mx-auto px-4 py-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Ciao, {userName.split(' ')[0]} 👋</h1>
-        <p className="text-gray-500 text-sm mt-1">Scopri i tuoi colleghi</p>
+        <h1 className="text-2xl font-bold text-white">Ciao, {userName.split(' ')[0]} 👋</h1>
+        <p className="text-white/50 text-sm mt-1">Scopri i tuoi colleghi</p>
       </div>
 
       {profile && <div className="mb-6"><ProfileCompleteness score={profile.profileScore} /></div>}
@@ -52,37 +52,37 @@ export default function Home() {
           <Link
             key={to}
             to={to}
-            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+            className="bg-agic-card rounded-xl p-4 border border-agic-border hover:border-agic-primary/30 hover:bg-agic-primary/5 transition-all"
           >
             <div className="text-2xl mb-1">{emoji}</div>
-            <div className="font-semibold text-sm text-gray-800">{label}</div>
-            <div className="text-xs text-gray-500">{desc}</div>
+            <div className="font-semibold text-sm text-white">{label}</div>
+            <div className="text-xs text-white/40">{desc}</div>
           </Link>
         ))}
       </div>
 
       {suggestions.length > 0 && (
         <div>
-          <h2 className="font-semibold text-gray-700 mb-3">Persone che potresti conoscere</h2>
+          <h2 className="font-semibold text-white/70 mb-3 text-sm uppercase tracking-wide">Persone che potresti conoscere</h2>
           <div className="space-y-3">
             {suggestions.map((s) => (
               <Link
                 key={s.id}
                 to={`/profile/${s.id}`}
-                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center gap-3 hover:shadow-md transition-shadow"
+                className="bg-agic-card rounded-xl p-4 border border-agic-border flex items-center gap-3 hover:border-agic-primary/30 transition-all"
               >
                 {s.avatarUrl ? (
                   <img src={s.avatarUrl} alt={s.displayName} className="w-10 h-10 rounded-full" />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center font-bold text-primary-600">
+                  <div className="w-10 h-10 rounded-full bg-agic-primary/20 flex items-center justify-center font-bold text-agic-primary">
                     {s.displayName.charAt(0)}
                   </div>
                 )}
                 <div className="flex-1">
-                  <div className="font-medium text-sm text-gray-800">{s.displayName}</div>
-                  <div className="text-xs text-gray-500">{s.role}</div>
+                  <div className="font-medium text-sm text-white">{s.displayName}</div>
+                  <div className="text-xs text-white/40">{s.role}</div>
                 </div>
-                <div className="text-sm font-bold text-primary-600">{Math.round(s.matchScore * 100)}%</div>
+                <div className="text-sm font-bold text-gradient-agic">{Math.round(s.matchScore * 100)}%</div>
               </Link>
             ))}
           </div>
