@@ -1,6 +1,6 @@
 # Hello Work — Offerta Commerciale
 ## Piattaforma di Corporate Networking
-### Riservata e Confidenziale | AGIC per [Nome Cliente] | Giugno 2026 | v1.0
+### Riservata e Confidenziale | Team Red per [Nome Cliente] | Giugno 2026 | v1.0
 
 *Connect. Discover. Belong.*
 
@@ -12,7 +12,7 @@ Il lavoro ibrido e da remoto ha trasformato profondamente il modo in cui le pers
 
 **Hello Work** è la risposta strategica a questa sfida: una piattaforma enterprise di corporate networking progettata per ricostruire la serendipità del contatto umano in contesti distribuiti — combinando profilo professionale, identità agentiva (AI tools, workflow) e dimensione personale in un'unica esperienza coinvolgente.
 
-**Perché AGIC:** competenza AI-native, deep expertise Azure, approccio co-design iterativo con MVP in 90 giorni.
+**Perché Team Red:** competenza AI-native, deep expertise Azure, approccio co-design iterativo con MVP in 90 giorni.
 
 ---
 
@@ -73,7 +73,7 @@ Il lavoro ibrido e da remoto ha trasformato profondamente il modo in cui le pers
 
 ## Piano di Investimento
 
-### Tariffe AGIC
+### Tariffe Team Red
 
 | Ruolo | Tariffa/gg |
 |-------|------------|
@@ -139,5 +139,5 @@ L'offerta commerciale è focalizzata su: perimetro di fornitura, piano di invest
 
 ---
 
-*AGIC S.r.l. — hello@agic.it — www.agic.it*
+*Team Red*
 *"We don't just build technology. We build the future of work."*

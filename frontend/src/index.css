@@ -1,37 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+:root {
+  --agic-primary: #DC0278;
+  --agic-secondary: #EB5E2D;
+  --agic-dark: #121320;
+  --agic-card: #1a1b2e;
+}
 
-  body {
-    @apply bg-white dark:bg-agic-dark text-gray-900 dark:text-white transition-colors duration-200;
-  }
-
-  * {
-    @apply border-gray-200 dark:border-agic-border;
-  }
+body {
+  background-color: var(--agic-dark);
+  color: #ffffff;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 @layer utilities {
-  .gradient-text {
-    @apply bg-gradient-to-r from-agic-primary to-agic-secondary bg-clip-text text-transparent;
+  .text-gradient-agic {
+    background: linear-gradient(90deg, #DC0278 0%, #EB5E2D 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  .gradient-bg {
-    @apply bg-gradient-to-r from-agic-primary to-agic-secondary;
+  .border-agic {
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
-  .card {
-    @apply bg-white dark:bg-agic-card border border-gray-100 dark:border-agic-border rounded-xl;
+  .bg-agic-card {
+    background-color: #1a1b2e;
   }
 
-  .card-2xl {
-    @apply bg-white dark:bg-agic-card border border-gray-100 dark:border-agic-border rounded-2xl;
+  .ring-agic-primary {
+    --tw-ring-color: rgba(220, 2, 120, 0.4);
   }
 }

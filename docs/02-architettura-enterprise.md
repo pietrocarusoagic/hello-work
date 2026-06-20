@@ -369,7 +369,7 @@ User A swipes RIGHT su User B
 ┌────────────────────────────────────────────────────────────┐
 │               Hello Work — Multi-Tenant Model              │
 │                                                            │
-│  Tenant AGIC          Tenant ClienteCorp     Tenant BankXY │
+│  Tenant Team Red      Tenant ClienteCorp     Tenant BankXY │
 │  ┌──────────────┐     ┌──────────────┐     ┌────────────┐ │
 │  │ AAD Tenant A │     │ AAD Tenant B │     │ AAD Ext ID │ │
 │  │ (existing)   │     │ (federated)  │     │ (B2B guest)│ │
@@ -513,8 +513,8 @@ Q1 2027 — Scale
 ---
 
 *Hello Work — Enterprise Architecture*
-*AGIC — Giugno 2026*
-*Gilbert — Solution Architect, AGIC AI Team*
+*Team Red — Giugno 2026*
+*Solution Architect, Team Red*
 ```
 
 ---

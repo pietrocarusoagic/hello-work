@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, User, Heart, Users, MapPin, Sun, Moon, LogOut } from 'lucide-react'
+import { Home, User, Heart, Users, MapPin, Sun, Moon, LogOut, UserCog } from 'lucide-react'
 import { useMsal } from '@azure/msal-react'
 import { DEV_BYPASS } from '../lib/devBypass'
 import { useTheme } from '../lib/theme'
@@ -23,17 +23,17 @@ export default function NavBar() {
       <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-agic-dark/95 backdrop-blur border-b border-gray-100 dark:border-agic-border transition-colors duration-200">
         <div className="max-w-5xl mx-auto px-6 w-full flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <span className="text-lg font-black tracking-tight">
+          <div className="flex items-center gap-2">
+            <Link to="/" className="text-lg font-black tracking-tight">
               <span className="gradient-text">Hello</span>
               <span className="text-gray-800 dark:text-white"> Work</span>
-            </span>
+            </Link>
             {DEV_BYPASS && (
-              <span className="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full font-medium">
-                DEV
+              <span className="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full font-medium border border-yellow-200 dark:border-yellow-700/40">
+                🛠 DEV
               </span>
             )}
-          </Link>
+          </div>
 
           {/* Nav links */}
           <div className="flex items-center gap-1">
@@ -65,7 +65,16 @@ export default function NavBar() {
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            {!DEV_BYPASS && (
+            {DEV_BYPASS ? (
+              <Link
+                to="/debug/login"
+                className="flex items-center gap-1.5 p-2 rounded-lg text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors text-sm"
+                title="Cambia utente di test"
+              >
+                <UserCog size={16} />
+                <span>Switch user</span>
+              </Link>
+            ) : (
               <button
                 onClick={() => void instance.logoutRedirect()}
                 className="flex items-center gap-1.5 p-2 rounded-lg text-gray-500 dark:text-white/60 hover:text-red-500 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-agic-card transition-colors text-sm"
@@ -98,13 +107,23 @@ export default function NavBar() {
               </Link>
             )
           })}
-          <button
-            onClick={toggle}
-            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs font-medium text-gray-400 dark:text-white/40 transition-colors"
-          >
-            {theme === 'dark' ? <Sun size={20} strokeWidth={1.8} /> : <Moon size={20} strokeWidth={1.8} />}
-            <span>Tema</span>
-          </button>
+          {DEV_BYPASS ? (
+            <Link
+              to="/debug/login"
+              className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs font-medium text-yellow-500 dark:text-yellow-400"
+            >
+              <UserCog size={20} strokeWidth={1.8} />
+              <span>Switch</span>
+            </Link>
+          ) : (
+            <button
+              onClick={toggle}
+              className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs font-medium text-gray-400 dark:text-white/40 transition-colors"
+            >
+              {theme === 'dark' ? <Sun size={20} strokeWidth={1.8} /> : <Moon size={20} strokeWidth={1.8} />}
+              <span>Tema</span>
+            </button>
+          )}
         </div>
       </nav>
     </>
