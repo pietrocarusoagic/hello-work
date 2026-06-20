@@ -1,15 +1,17 @@
 ---
 name: implement
-description: "Implement a piece of work based on a PRD or set of issues."
-disable-model-invocation: true
+description: Implement a feature or fix a bug. Use when the user wants to build something specific and has a clear spec.
 ---
 
-Implement the work described by the user in the PRD or issues.
+# Implement
 
-Use /tdd where possible, at pre-agreed seams.
+Implement features or fixes following the project's existing patterns and conventions.
 
-Run typechecking regularly, single test files regularly, and the full test suite once at the end.
+## Process
 
-Once done, use /review to review the work.
-
-Commit your work to the current branch.
+1. Read `CONTEXT.md` (if present) to use the correct domain vocabulary
+2. Understand the existing code in the area before writing new code
+3. Write the minimal code that satisfies the requirement
+4. Use the TDD skill if behavior is complex or risk of regression is high
+5. Run existing tests to verify nothing broke
+6. Refactor only after tests are green
