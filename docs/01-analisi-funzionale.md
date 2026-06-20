@@ -480,3 +480,42 @@ Mese 3   [████████████] Frontend + Backend (Gruppi, Offi
 
 *Documento prodotto per Hello Work — Hackathon Edition | Giugno 2026*
 *AGIC — Connect. Discover. Belong.*
+
+---
+
+## Business Case
+
+### Contesto e Problema
+
+Il lavoro ibrido e da remoto ha trasformato profondamente il modo in cui le persone collaborano, si conoscono e si sentono parte di un'organizzazione. Il **62% dei lavoratori ibridi** dichiara di sentirsi meno connesso ai colleghi rispetto all'era pre-pandemia, e le organizzazioni con bassa coesione interna registrano tassi di turnover fino al **40% superiori** alla media.
+
+| Problema | Impatto | Soluzione Hello Work |
+|----------|---------|----------------------|
+| Colleghi che non si conoscono tra sedi | Silos, duplicazione competenze | Discovery Feed + Tag-based Matching |
+| Nessuna visibilità sui workflow AI | Knowledge loss, mancata adozione | Agentic Profile + Knowledge Repository |
+| Difficoltà connessione cross-team | Bassa innovazione | WorkMatch — matching 1:1 |
+| Uffici fisici sottoutilizzati | ROI immobiliare negativo | Office Map con people clustering |
+| Isolamento remote workers | Engagement –28%, turnover +40% | Profilo Human/Personal + Groups |
+
+### ROI — Riduzione Turnover
+
+> Azienda 1.000 dipendenti, stipendio medio €45k, turnover 12% → 120 uscite/anno × €22.500 sostituzione = **€2.7M costo nascosto**. Ridurlo del 20% = **€540k/anno risparmiati** → break-even in < 4 mesi.
+
+### ROI — Adozione AI
+
+- Visibilità immediata su chi usa quali tool e come
+- Riduzione tempo onboarding AI stimata –30%
+- KPI: % dipendenti con ≥1 AI tool nel profilo entro 6 mesi
+
+### ROI — Produttività
+
+| Indicatore | Baseline | Target (12 mesi) |
+|------------|----------|------------------|
+| Connessioni cross-team/persona/mese | 0.5 | 3–5 |
+| Time-to-find-expert interno | 2–4 giorni | < 4 ore |
+| Employee Net Promoter Score | +15 | +35 |
+
+---
+
+*Documento prodotto per Hello Work — Hackathon Edition | Giugno 2026*
+*AGIC — Connect. Discover. Belong.*
