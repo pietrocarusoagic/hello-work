@@ -1,13 +1,10 @@
 import { useMsal, useIsAuthenticated } from '@azure/msal-react'
 import { Navigate } from 'react-router-dom'
 import { loginRequest } from '../lib/msalConfig'
-import { useTheme } from '../lib/theme'
-import { Sun, Moon } from 'lucide-react'
 
 export default function Login() {
   const { instance } = useMsal()
   const isAuthenticated = useIsAuthenticated()
-  const { theme, toggle } = useTheme()
 
   if (isAuthenticated) return <Navigate to="/" replace />
 
