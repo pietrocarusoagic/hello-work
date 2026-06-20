@@ -1,10 +1,4 @@
-# Hello Work — Architecture Documents
-
-Two deliverables, production-ready. Let me write them now.
-
----
-
-# DELIVERABLE 1: Architettura POC — Hello Work
+# Hello Work — Architettura POC
 
 > **Target**: Deployed & demo-ready by 16:50 today.
 
@@ -17,16 +11,16 @@ Two deliverables, production-ready. Let me write them now.
 │                        HELLO WORK — POC                             │
 │                                                                     │
 │  Browser / Laptop                                                   │
-│  ┌──────────────┐                                                   │
-│  │  Next.js 14  │  ◄── Azure Static Web Apps (or Container Apps)   │
-│  │  (React SPA) │                                                   │
-│  └──────┬───────┘                                                   │
-│         │ HTTPS / REST                                              │
-│         ▼                                                           │
+│  ┌─────────────────────────────────┐                                │
+│  │  React 19 + TypeScript (Vite 6) │  ◄── Azure Static Web Apps    │
+│  │  (SPA)                          │                                │
+│  └──────────────┬──────────────────┘                                │
+│                 │ HTTPS / REST                                       │
+│                 ▼                                                    │
 │  ┌──────────────────────────────────────────────────────────────┐  │
 │  │              Azure Container Apps                            │  │
 │  │   ┌────────────────────────────────────────────────────┐    │  │
-│  │   │  FastAPI  (Python 3.12)  — API Gateway + BLL        │    │  │
+│  │   │  ASP.NET Core 10 C#  — API Gateway + BLL           │    │  │
 │  │   │                                                     │    │  │
 │  │   │  /auth     → MSAL token validation                 │    │  │
 │  │   │  /profiles → CRUD profiles (3 pillars)             │    │  │
@@ -61,13 +55,13 @@ Two deliverables, production-ready. Let me write them now.
 
 | Servizio | SKU / Tier | Ruolo |
 |---|---|---|
-| **Azure Container Apps** | Consumption plan | Host FastAPI backend — scale to zero, zero infra management |
+| **Azure Container Apps** | Consumption plan | Host ASP.NET Core 10 backend — scale to zero, zero infra management |
 | **Azure Database for PostgreSQL Flexible Server** | Burstable B1ms | Datastore principale: profili, match, swipe, gruppi |
 | **Azure Active Directory / Entra ID** | Existing tenant | SSO aziendale, pre-population profilo da AAD claims |
-| **Azure Static Web Apps** | Free tier | Host Next.js 14 (o deploy su Container Apps se SSR necessario) |
+| **Azure Static Web Apps** | Free tier | Host React 19 SPA (build Vite 6) |
 | **Azure Blob Storage** | LRS Hot | Avatar upload, assets statici |
 | **Azure Maps** | Gen 2 S0 | Office Map — tile rendering + clustering pushpin API |
-| **Azure Container Registry** | Basic | Registry immagini Docker per FastAPI |
+| **Azure Container Registry** | Basic | Registry immagini Docker per ASP.NET Core |
 | **Azure Key Vault** | Standard | Secrets: DB connection string, Maps API key, MSAL client secret |
 
 **Costo stimato POC**: < €15/mese (scale-to-zero + tier minimi)
@@ -76,23 +70,24 @@ Two deliverables, production-ready. Let me write them now.
 
 ## 3. Stack Tecnico
 
-### Frontend — Next.js 14
+### Frontend — React 19 + TypeScript + Vite 6
 ```
 src/
-├── app/
-│   ├── (auth)/login/         → MSAL redirect handler
-│   ├── (app)/home/           → Discovery Feed
-│   ├── (app)/profile/        → Profilo 3 pilastri + onboarding
-│   ├── (app)/workmatch/      → Swipe UI (Framer Motion cards)
-│   ├── (app)/groups/         → Lista + suggerimenti gruppi
-│   └── (app)/map/            → Azure Maps embed
+├── pages/
+│   ├── Login.tsx              → MSAL redirect handler
+│   ├── Home.tsx               → Discovery Feed
+│   ├── Profile.tsx            → Profilo 3 pilastri + onboarding
+│   ├── WorkMatch.tsx          → Swipe UI (Framer Motion cards)
+│   ├── Groups.tsx             → Lista + suggerimenti gruppi
+│   └── Map.tsx                → Azure Maps embed
 ├── components/
 │   ├── SwipeCard.tsx          → WorkMatch card
 │   ├── ProfilePillar.tsx      → Pillar editor (Prof/Agentic/Human)
 │   └── OfficeMap.tsx          → Azure Maps React wrapper
-└── lib/
-    ├── msalConfig.ts          → MSAL.js configuration
-    └── api.ts                 → Typed fetch client
+├── lib/
+│   ├── msalConfig.ts          → MSAL.js configuration
+│   └── api.ts                 → Typed fetch client (fetch + generics)
+└── vite.config.ts             → Vite 6 configuration
 ```
 
 **Librerie chiave:**
@@ -102,22 +97,25 @@ src/
 - `azure-maps-control` — Office Map
 - `tailwindcss` + `shadcn/ui` — UI components rapidi
 
-### Backend — FastAPI
-```python
-# Struttura moduli
-app/
-├── routers/
-│   ├── auth.py        # Token introspection, AAD graph call
-│   ├── profiles.py    # CRUD profilo, 3 pilastri
-│   ├── matches.py     # Tag-overlap scoring engine
-│   ├── workmatch.py   # Swipe state (liked/passed/matched)
-│   ├── groups.py      # CRUD gruppi + suggestion
-│   └── map.py         # People cluster per ufficio
-├── models/            # SQLAlchemy ORM
-├── schemas/           # Pydantic v2 (input/output validation)
-└── core/
-    ├── auth.py        # JWT validation middleware (MSAL)
-    └── db.py          # Async PostgreSQL (asyncpg)
+### Backend — ASP.NET Core 10 C#
+```csharp
+// Struttura moduli
+HelloWork.Api/
+├── Controllers/
+│   ├── AuthController.cs      // Token introspection, AAD graph call
+│   ├── ProfilesController.cs  // CRUD profilo, 3 pilastri
+│   ├── MatchesController.cs   // Tag-overlap scoring engine
+│   ├── WorkMatchController.cs // Swipe state (liked/passed/matched)
+│   ├── GroupsController.cs    // CRUD gruppi + suggestion
+│   └── MapController.cs       // People cluster per ufficio
+├── Models/                    // EF Core entities
+├── DTOs/                      // Request/Response record types
+├── Services/
+│   ├── MatchingService.cs     // Jaccard similarity engine
+│   └── AadGraphService.cs     // Microsoft Graph SDK
+└── Infrastructure/
+    ├── AppDbContext.cs         // EF Core + Npgsql
+    └── JwtValidationMiddleware.cs  // MSAL JWT validation
 ```
 
 ### Database — PostgreSQL Schema (core tables)
@@ -189,26 +187,39 @@ CREATE TABLE group_members (
 
 ## 4. Matching Engine (POC — Deterministic)
 
-```python
-def compute_match_score(user_a: User, user_b: User) -> float:
-    """
-    Jaccard similarity across all 3 pillars with weights.
-    No ML needed — deterministic, fast, explainable.
-    """
-    weights = {"professional": 0.35, "agentic": 0.40, "human": 0.25}
+```csharp
+public class MatchingService
+{
+    /// <summary>
+    /// Jaccard similarity across all 3 pillars with weights.
+    /// No ML needed — deterministic, fast, explainable.
+    /// </summary>
+    public double ComputeMatchScore(User userA, User userB)
+    {
+        const double weightProfessional = 0.35;
+        const double weightAgentic      = 0.40;
+        const double weightHuman        = 0.25;
 
-    def jaccard(set_a: set, set_b: set) -> float:
-        if not set_a and not set_b:
-            return 0.0
-        return len(set_a & set_b) / len(set_a | set_b)
+        static double Jaccard(IEnumerable<string> a, IEnumerable<string> b)
+        {
+            var setA = a.ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var setB = b.ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (setA.Count == 0 && setB.Count == 0) return 0.0;
+            int intersection = setA.Count(x => setB.Contains(x));
+            int union = setA.Union(setB).Count();
+            return (double)intersection / union;
+        }
 
-    score = (
-        weights["professional"] * jaccard(set(user_a.skills), set(user_b.skills)) +
-        weights["agentic"]      * jaccard(set(user_a.ai_tools), set(user_b.ai_tools)) +
-        weights["human"]        * jaccard(set(user_a.hobbies + user_a.interests),
-                                          set(user_b.hobbies + user_b.interests))
-    )
-    return round(score, 4)
+        double score =
+            weightProfessional * Jaccard(userA.Skills, userB.Skills) +
+            weightAgentic      * Jaccard(userA.AiTools, userB.AiTools) +
+            weightHuman        * Jaccard(
+                userA.Hobbies.Concat(userA.Interests),
+                userB.Hobbies.Concat(userB.Interests));
+
+        return Math.Round(score, 4);
+    }
+}
 ```
 
 **WorkMatch bilateral match trigger:**
@@ -223,7 +234,7 @@ IF swipe(A→B) = 'like' AND swipe(B→A) = 'like'
 ## 5. Azure AD SSO Flow
 
 ```
-Browser                 Next.js              Azure AD           FastAPI
+Browser                 React SPA            Azure AD           ASP.NET Core
    │                       │                     │                 │
    │── Login click ────────►│                     │                 │
    │                       │── MSAL redirect ────►│                 │
@@ -251,13 +262,13 @@ Browser                 Next.js              Azure AD           FastAPI
 | Decisione | Scelta | Rationale |
 |---|---|---|
 | **Backend runtime** | Azure Container Apps (Consumption) | Deploy in 5 min da Docker, scale-to-zero per demo |
+| **Backend framework** | ASP.NET Core 10 C# | Performance nativa, typed endpoints, minimal API overhead |
+| **Frontend framework** | React 19 + TypeScript + Vite 6 | SPA veloce, HMR istantaneo con Vite, ecosystem maturo |
 | **Auth flow** | MSAL.js + Azure AD (existing tenant) | SSO aziendale nativo, no custom auth da costruire |
-| **Matching algorithm** | Jaccard deterministic | Zero training data needed, esplicabile ai giudici |
-| **DB** | PostgreSQL Flexible Server | Array columns per tags, full-text search su ai_description |
+| **Matching algorithm** | Jaccard deterministic (C#) | Zero training data needed, esplicabile ai giudici |
+| **DB** | PostgreSQL Flexible Server + EF Core | Array columns per tags, full-text search su ai_description |
 | **Office Map** | Azure Maps + static GeoJSON | Uffici AGIC hard-coded come GeoJSON → clustering nativo Maps |
 | **Swipe UI** | react-tinder-card | 30 min di integrazione, effetto wow garantito |
-| **CI/CD POC** | GitHub Actions → ACR → Container Apps | Pipeline 3-step, 8 min end-to-end |
-
----
+| **CI/CD POC** | GitHub Actions → ACR → Container Apps | Pipeline 3-step: `dotnet build` + `dotnet test` + Docker push |
 
 ---
