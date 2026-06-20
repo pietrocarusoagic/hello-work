@@ -1,7 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --agic-primary: #DC0278;
+  --agic-secondary: #EB5E2D;
+  --agic-dark: #121320;
+  --agic-card: #1a1b2e;
+}
+
 body {
-  @apply bg-gray-50 text-gray-900;
+  background-color: var(--agic-dark);
+  color: #ffffff;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer utilities {
+  .text-gradient-agic {
+    background: linear-gradient(90deg, #DC0278 0%, #EB5E2D 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .border-agic {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .bg-agic-card {
+    background-color: #1a1b2e;
+  }
+
+  .ring-agic-primary {
+    --tw-ring-color: rgba(220, 2, 120, 0.4);
+  }
 }
