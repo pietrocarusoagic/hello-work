@@ -1,11 +1,27 @@
-node_modules/
-__pycache__/
-.env
-.env.local
-*.pyc
-dist/
-.next/
-venv/
-.venv/
-*.egg-info/
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.userprefs
+*.lock.json
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+
+# OS
 .DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log

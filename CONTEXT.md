@@ -1,26 +1,70 @@
-# Matt Pocock Skills
+# Hello Work — Domain Context (Ubiquitous Language)
 
-A collection of agent skills (slash commands and behaviors) loaded by Claude Code. Skills are organized into buckets and consumed by per-repo configuration emitted by `/setup-matt-pocock-skills`.
+> Questo file è il glossario del dominio. Solo terminologia — nessun dettaglio implementativo.
+> Skill: engineering/domain-modeling
 
-## Language
+---
 
-**Issue tracker**:
-The tool that hosts a repo's issues — GitHub Issues, Linear, a local `.scratch/` markdown convention, or similar. Skills like `to-issues`, `to-prd`, `triage`, and `qa` read from and write to it.
-_Avoid_: backlog manager, backlog backend, issue host
+## Entità Principali
 
-**Issue**:
-A single tracked unit of work inside an **Issue tracker** — a bug, task, PRD, or slice produced by `to-issues`.
-_Avoid_: ticket (use only when quoting external systems that call them tickets)
+**User** — Un dipendente dell'organizzazione. Si autentica tramite Azure AD. Ha un profilo a 3 pilastri.
 
-**Triage role**:
-A canonical state-machine label applied to an **Issue** during triage (e.g. `needs-triage`, `ready-for-afk`). Each role maps to a real label string in the **Issue tracker** via `docs/agents/triage-labels.md`.
+**Profile (Profilo)** — La rappresentazione di un User sulla piattaforma. Composto da 3 pilastri. Viene pre-popolato da Azure AD al primo accesso e completato manualmente dall'utente.
 
-## Relationships
+**Profile Score** — Un punteggio intero da 0 a 100 che indica la completezza del profilo. Aumenta al riempimento di ciascuna sezione.
 
-- An **Issue tracker** holds many **Issues**
-- An **Issue** carries one **Triage role** at a time
+---
 
-## Flagged ambiguities
+## I 3 Pilastri del Profilo
 
-- "backlog" was previously used to mean both the *tool* hosting issues and the *body of work* inside it — resolved: the tool is the **Issue tracker**; "backlog" is no longer used as a domain term.
-- "backlog backend" / "backlog manager" — resolved: collapsed into **Issue tracker**.
+**Professional Pillar (Pilastro Professionale)** — Competenze tecniche, certificazioni, ruolo, dipartimento. Pre-popolato da Azure AD. Peso nel match score: **35%**.
+
+**Agentic Pillar (Pilastro Agentic)** — Strumenti AI utilizzati (Claude, Copilot, n8n…) e descrizione dell'approccio AI. Compilato manualmente. Peso nel match score: **40%**.
+
+**Human Pillar (Pilastro Umano)** — Hobby e interessi personali. Opt-in esplicito. Peso nel match score: **25%**.
+
+---
+
+## WorkMatch
+
+**WorkMatch** — Il modulo di scoperta a swipe. Presenta card di colleghi candidati ordinati per match score.
+
+**Swipe** — L'azione di un User su una WorkMatch card: `like` (destra) o `pass` (sinistra).
+
+**Mutual Match** — Si verifica quando User A ha effettuato `like` su B E User B ha effettuato `like` su A. Genera un record in `matches` e una notifica "Prenota un caffè ☕".
+
+**Match Score** — Coefficiente Jaccard pesato tra i tag dei 3 pilastri di due User. Range: 0.0–1.0.
+
+---
+
+## Gruppi
+
+**Group** — Una comunità di interesse interna all'organizzazione. Può essere creata dagli utenti o suggerita dal sistema.
+
+**System-Suggested Group** — Un Group suggerito automaticamente sulla base dell'overlap tra i tag dell'utente e i tag del gruppo. Marcato come `isSystemSuggested: true`.
+
+**Group Membership** — La relazione tra un User e un Group. Creata con join, distrutta con leave.
+
+---
+
+## Discovery
+
+**Discovery Feed** — La homepage. Mostra suggerimenti di persone da conoscere basati su match score.
+
+**Suggestion** — Un User proposto a un altro User come persona da conoscere, ordinato per match score e non ancora swipato.
+
+---
+
+## Autenticazione
+
+**AAD OID** — L'Object ID di Azure Active Directory. Identificatore univoco di un User nell'identità aziendale. Chiave di upsert al primo accesso.
+
+**SSO** — Single Sign-On tramite Azure AD / Entra ID. Unico meccanismo di autenticazione — nessuna registrazione email/password.
+
+---
+
+## Office Map
+
+**Office Location** — La sede fisica di un User (es. Milano, Roma, Tirana). Viene da Azure AD `officeLocation`.
+
+**Office Cluster** — Un raggruppamento di User per Office Location con coordinate geografiche, usato per visualizzare la distribuzione sulla mappa.
