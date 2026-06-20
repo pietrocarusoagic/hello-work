@@ -96,28 +96,6 @@ Il lavoro ibrido e da remoto ha trasformato profondamente il modo in cui le pers
 
 ---
 
-## Business Case
-
-### ROI — Riduzione Turnover
-
-> Azienda 1.000 dipendenti, stipendio medio €45k, turnover 12% → 120 uscite/anno × €22.500 sostituzione = **€2.7M costo nascosto**. Ridurlo del 20% = **€540k/anno risparmiati** → break-even in < 4 mesi.
-
-### ROI — Adozione AI
-
-- Visibilità immediata su chi usa quali tool e come
-- Riduzione tempo onboarding AI stimata –30%
-- KPI: % dipendenti con ≥1 AI tool nel profilo entro 6 mesi
-
-### ROI — Produttività
-
-| Indicatore | Baseline | Target (12 mesi) |
-|------------|----------|------------------|
-| Connessioni cross-team/persona/mese | 0.5 | 3–5 |
-| Time-to-find-expert interno | 2–4 giorni | < 4 ore |
-| Employee Net Promoter Score | +15 | +35 |
-
----
-
 ## Modello SaaS Opzionale
 
 | Fascia | Prezzo/utente/mese | Incluso |
