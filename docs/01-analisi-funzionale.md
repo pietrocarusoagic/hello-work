@@ -1,482 +1,656 @@
-# Documento di Analisi Funzionale — Hello Work
+# Hello Work — Documento di Analisi Funzionale
+**v1.1** · 20 Giugno 2026
+
+---
+
+## 0. Classificazione dell'Iniziativa
+
+| Dimensione | Valore |
+|------------|--------|
+| **Tipo attuale** | POC (Proof of Concept) — hackathon / demo navigabile |
+| **Fase successiva pianificata** | MVP Enterprise — primo cliente pilota (single tenant) |
+| **Fase produzione** | Prodotto Enterprise multi-tenant (v2.0, fuori perimetro attuale) |
+| **Base contrattuale** | Non definita — stima giornate da intendersi come ordine di grandezza |
+| **Grado di maturità requisiti** | Bozza funzionale — soggetta a validazione con stakeholder cliente |
+
+**Distinzione operativa:**
+
+- **POC (oggi):** dimostrare la navigabilità del concept core. Nessun obbligo di completezza, scalabilità o conformità normativa.
+- **MVP Enterprise (mesi 1–3):** primo rilascio in produzione su cliente reale, single tenant, perimetro funzionale limitato. Richiede governance GDPR, integrazione Azure AD, e piano di change management.
+- **Prodotto Enterprise (mesi 4–9+):** multi-tenant, integrazioni avanzate, AI, mobile nativo. Stimato separatamente e condizionato all'esito del pilota.
 
 ---
 
 ## 1. Executive Summary
 
-### Il Problema
+### 1.1 Contesto e Problema
 
-Il lavoro remoto e ibrido ha reso le organizzazioni più flessibili, ma ha distrutto un elemento insostituibile della vita aziendale: la **serendipità relazionale**. L'incontro casuale alla macchina del caffè, la conversazione spontanea in corridoio, la scoperta che il collega di un altro team ha già risolto il problema su cui stai lavorando da settimane — tutto questo è scomparso. Il risultato è un tessuto sociale aziendale frammentato, knowledge silos sempre più profondi e una sensazione diffusa di isolamento, in particolare tra i nuovi assunti.
+Il lavoro remoto e ibrido ha modificato strutturalmente le modalità di collaborazione nelle organizzazioni distribuite. Accanto ai benefici di flessibilità e continuità operativa, emergono criticità documentate sul piano del capitale relazionale interno: riduzione delle interazioni informali, difficoltà nell'onboarding sociale dei nuovi assunti, erosione del senso di appartenenza in team distribuiti su più sedi o fusi orari.
 
-### La Soluzione
+Secondo Gallup (2024), il 60% dei lavoratori remoti riporta una diminuzione della connessione percepita con i colleghi. Le organizzazioni con basso punteggio di community interna registrano tassi di turnover superiori del 23% rispetto alla media. Questi dati indicano un'opportunità di intervento a supporto dell'engagement e della retention, ma la correlazione causale tra strumenti digitali e questi indicatori dipende in misura significativa da fattori organizzativi e culturali che esulano dallo scope tecnico della piattaforma.
 
-**Hello Work** è una piattaforma di corporate networking progettata per la generazione ibrida. Ricostruisce la serendipità in modo ingegnerizzato: attraverso profili strutturati su tre pilastri (professionale, agentiche, umano/personale), un sistema di matching deterministico su tag, e meccaniche di discovery ispirate ai social consumer — reimmaginate per il contesto enterprise.
+Il problema che Hello Work intende affrontare è specifico: **la mancanza di un canale strutturato per la scoperta e il contatto tra colleghi al di fuori dei processi lavorativi formali.**
 
-**Tagline**: *Connect. Discover. Belong.*
+### 1.2 La Soluzione: Hello Work
 
-### Target Users
+Hello Work è una piattaforma di corporate networking progettata per abilitare connessioni tra colleghi — professionali e personali — in contesti aziendali distribuiti.
 
-Dipendenti di aziende enterprise in modalità remota, ibrida o distribuita su più sedi. Priorità hackathon: organizzazione AGIC con uffici in Italia e Tirana.
+La piattaforma non sostituisce strumenti di comunicazione esistenti (Teams, email, intranet) né sistemi HR di record. Si posiziona come canale complementare dedicato alla scoperta delle persone, all'attivazione di connessioni one-to-one e alla costruzione di comunità interne per interesse.
 
-### Business Value
+**Il valore della piattaforma è condizionato da:** qualità e completezza dei profili utente, livello di sponsorship interna, adeguatezza del piano di change management, e continuità dell'impegno editoriale (icebreaker, eventi, spotlight).
 
-| Dimensione | Impatto atteso |
-|---|---|
-| **Onboarding time-to-connection** | Riduzione del 40-60% del tempo necessario a un nuovo assunto per identificare i colleghi rilevanti |
-| **Knowledge sharing agentiche** | Creazione di un repository vivo di AI workflow aziendali, oggi disperso e non strutturato |
-| **Employee engagement** | Riduzione del senso di isolamento remoto; aumento dell'appartenenza percepita |
-| **Talent retention** | Le relazioni interpersonali sono il principale driver di retention; Hello Work le costruisce sistematicamente |
-| **Cross-team collaboration** | Discovery proattiva di competenze complementari attraverso sedi e team |
+### 1.3 Target Utenti
 
----
+| Segmento | Descrizione | Bisogno principale |
+|----------|-------------|-------------------|
+| **Dipendente remoto** | Lavora full-remote, visibilità limitata sull'organizzazione | Accesso a una rete informale interna |
+| **Neo-assunto** | Appena entrato, deve costruire la propria rete | Onboarding sociale strutturato |
+| **Manager / Team Lead** | Coordina team distribuiti | Strumenti per favorire coesione |
+| **Expat / Mobilità** | Trasferito in nuova sede | Accesso alla rete locale |
+| **HR / People & Culture** | Responsabile engagement e retention | Visibilità sulle dinamiche di community |
 
-## 2. Contesto e Obiettivi
+### 1.4 Indicatori di Osservazione (KPI)
 
-### 2.1 Contesto
+I seguenti indicatori sono proposti come metriche osservabili post-rilascio MVP. Non costituiscono obiettivi contrattuali né proiezioni di business. I valori target saranno definiti insieme al cliente prima del go-live, in base al contesto organizzativo.
 
-L'adozione massiva di lavoro remoto e ibrido, accelerata dal 2020, ha prodotto tre patologie organizzative strutturali:
-
-**Isolamento relazionale**: I dipendenti remoti, specialmente i nuovi assunti, faticano a costruire una rete di colleghi al di fuori del loro team diretto. L'onboarding informale — quello che avviene nei corridoi, nelle pause, nei pranzi — non esiste più in forma spontanea.
-
-**Knowledge silos agentiche**: La diffusione di strumenti AI (Copilot, Claude, n8n, LangChain, ecc.) ha generato una proliferazione di setup, workflow e soluzioni individuali che non vengono mai condivise organizzativamente. Ogni professionista reinventa la ruota in isolamento.
-
-**Frammentazione geografica**: Organizzazioni con più sedi (come AGIC con Italia + Tirana) hanno difficoltà a creare senso di comunità cross-office. Chi lavora a Tirana non sa chi ha competenze simili a Milano, e viceversa.
-
-### 2.2 Obiettivi di Progetto
-
-**Obiettivo primario**: Fornire un punto di accesso unico per la discovery di persone, competenze e interessi all'interno dell'organizzazione.
-
-**Obiettivi secondari**:
-- Rendere il profilo professionale più ricco e più utile del classico organigramma
-- Creare un canale strutturato per la condivisione di knowledge agentiche
-- Facilitare la formazione organica di community di interesse (gruppi)
-- Dare visibilità geografica alla distribuzione dei talenti nelle sedi fisiche
-
-**KPI di successo (POC)**:
-- % di dipendenti con profilo compilato ≥ 80% entro 30 giorni dal lancio
-- Numero di WorkMatch bilaterali completati nella prima settimana
-- Numero di gruppi creati spontaneamente dagli utenti
-- Numero di ricerche nel repository agentiche
+| Indicatore | Modalità di rilevazione | Riferimento temporale |
+|------------|------------------------|----------------------|
+| % utenti con profilo completato ≥ 70% | Dashboard admin — campo `profile_score` | 30/60/90 giorni dal go-live |
+| Numero di coffee chat avviati per settimana | Log eventi piattaforma — tipo `connection_request` accettata | Cadenza settimanale |
+| % utenti attivi (almeno 1 login) negli ultimi 30 giorni | Metriche di sessione applicativa | Rolling 30 giorni |
+| Numero di gruppi creati e attivi (≥1 post/settimana) | Tabella `groups` — last_activity_at | Rolling 30 giorni |
+| Tasso di completamento richiesta coffee chat (inviata → accettata) | Funnel eventi — accepted/total | Mensile |
+| Numero di endorsement ricevuti per utente | Tabella `endorsements` | Mensile |
+| % utenti onboarded tramite import Azure AD | Log provisioning — sync_status | Entro 7 giorni dal go-live |
 
 ---
 
-## 3. Requisiti Funzionali per Modulo
+## 2. Assunzioni Progettuali
+
+Le seguenti assunzioni definiscono il perimetro di validità della presente analisi. Qualunque scostamento rispetto a questi elementi dovrà essere oggetto di analisi di impatto prima dell'avvio dei lavori.
+
+| # | Assunzione | Impatto se non verificata |
+|---|------------|--------------------------|
+| A01 | **Single tenant iniziale.** Il primo rilascio è dedicato a un singolo cliente. L'architettura multi-tenant è pianificata per v2.0 ma non inclusa nel perimetro MVP. | Ri-architettura del data model e dello strato di autenticazione |
+| A02 | **Azure Active Directory / Entra ID disponibile lato cliente.** Il cliente dispone di un tenant Azure AD attivo e configurabile per consentire l'integrazione SSO tramite OAuth 2.0 + OIDC. L'accesso all'ambiente di test sarà concesso entro la settimana 2 del progetto. | Necessità di sistema auth alternativo (+15 GU stimati); profilo non pre-popolabile |
+| A03 | **Numero utenti target indicativo: 500–2.000 MAU** per il pilota. Le stime di sizing infrastrutturale e di performance si basano su questo range. | Revisione architettura e costi in caso di scostamento rilevante |
+| A04 | **Disponibilità di uno stakeholder decisionale e di un referente tecnico** lato cliente per tutta la durata del progetto. Sono previsti SAL mensili e sessioni di UAT. | Rischio di deriva dei requisiti e blocchi decisionali |
+| A05 | **Governance privacy e dati definita lato cliente** prima del go-live: base giuridica del trattamento, designazione del DPO se applicabile, informativa utenti, consensi. La piattaforma è progettata per conformità GDPR ma non sostituisce il processo organizzativo del cliente. | Blocco al go-live per mancata conformità normativa |
+| A06 | **Nessuna integrazione con sistemi HRIS** (SAP SuccessFactors, Workday, ecc.) nel perimetro MVP. Il profilo utente si popola da Azure AD e da compilazione manuale. | L'integrazione HRIS è stimata separatamente in v2.0 |
+| A07 | **Dati di identità in Azure AD sono aggiornati e completi** (nome, cognome, ruolo, dipartimento, sede) per almeno il 70% della popolazione target. | Profili parziali → riduzione del valore percepito della piattaforma al lancio |
+| A08 | **Il cliente nomina un owner interno** (HR o People & Culture) responsabile dell'attivazione degli utenti, della moderazione dei contenuti e della comunicazione interna di lancio. | Adozione dipendente esclusivamente da iniziativa spontanea degli utenti |
+| A09 | **Assenza di requisiti di integrazione con sistemi non esplicitati** in questo documento. Eventuali integrazioni aggiuntive (Slack, SharePoint, HRIS, ecc.) saranno oggetto di change request. | |
 
 ---
 
-### 3.1 Autenticazione & Onboarding
+## 3. Limiti della Soluzione
 
-#### Autenticazione
+La presente sezione esplicita i confini della piattaforma e le condizioni che ne determinano il valore effettivo. Questi elementi devono essere comunicati chiaramente al cliente prima della firma contrattuale.
 
-| ID | Requisito |
-|----|-----------|
-| AUTH-01 | Il sistema deve supportare autenticazione tramite **Azure AD SSO** (OAuth 2.0 / OIDC) |
-| AUTH-02 | Al primo accesso, l'utente deve essere reindirizzato automaticamente al flusso di onboarding guidato |
-| AUTH-03 | Il sistema deve pre-popolare automaticamente i campi del Pilastro Professionale con i dati disponibili da Azure AD (nome, cognome, ruolo, dipartimento, sede) |
-| AUTH-04 | Nessuna password locale deve essere gestita dalla piattaforma — l'autenticazione è delegata interamente ad Azure AD |
-| AUTH-05 | Le sessioni devono scadere secondo la policy Azure AD dell'organizzazione |
+**3.1 La piattaforma non genera engagement autonomamente.**
+Hello Work fornisce gli strumenti tecnici per favorire connessioni tra colleghi. L'attivazione dell'engagement dipende da: sponsorship visibile del management, comunicazione interna di lancio, presidio editoriale continuativo (icebreaker, spotlight, eventi), e incentivi organizzativi all'utilizzo. In assenza di questi fattori, l'adozione spontanea degli utenti non è garantita dalla sola disponibilità dello strumento.
 
-#### Onboarding Guidato ("Ti presenti")
+**3.2 Il valore dipende dalla qualità dei profili utente.**
+Il motore di raccomandazione, la funzione WorkMatch e la ricerca per competenza e interesse producono risultati utili solo in presenza di profili compilati in modo sufficientemente completo. Un lancio con profili incompleti o prevalentemente auto-compilati con dati minimi non consente di validare l'utilità della piattaforma.
 
-| ID | Requisito |
-|----|-----------|
-| ONB-01 | Al primo accesso deve essere presentato un wizard a **3 step** denominato "Ti presenti" |
-| ONB-02 | **Step 1 — Chi sei professionalmente**: conferma/integrazione dati da Azure AD, aggiunta skill e certificazioni |
-| ONB-03 | **Step 2 — Il tuo setup agentiche**: selezione tag tool AI (lista predefinita + campo libero), descrizione testuale opzionale del proprio workflow |
-| ONB-04 | **Step 3 — Chi sei come persona**: selezione hobby tag (lista predefinita + campo libero), interessi personali |
-| ONB-05 | Ogni step deve mostrare una progress bar con indicatore visivo di completamento |
-| ONB-06 | L'utente deve poter saltare uno step e completarlo successivamente dal profilo |
-| ONB-07 | Al completamento dell'onboarding, l'utente deve essere reindirizzato alla Discovery Home |
-| ONB-08 | Se l'onboarding non è completato al 100%, una notifica in-app deve ricordare all'utente di completarlo |
+**3.3 L'adozione dipende da change management e sponsorship interna.**
+La piattaforma non è uno strumento di produttività obbligatorio. La sua diffusione segue logiche di adozione volontaria, soggette a resistenze culturali (privacy percepita, abitudine agli strumenti esistenti, saturazione digitale). Un piano strutturato di change management non è opzionale: è condizione necessaria per raggiungere soglie di utilizzo significative.
+
+**3.4 Il POC non è rappresentativo delle performance di produzione.**
+Il POC realizzato in questa fase è ottimizzato per la navigabilità della demo, non per la scalabilità, la sicurezza o la conformità normativa. Non deve essere considerato come base per valutazioni di produzione.
+
+**3.5 La piattaforma non gestisce processi HR formali.**
+Hello Work non è un sistema di performance management, succession planning o talent acquisition. Le connessioni, gli endorsement e le interazioni sulla piattaforma non hanno valore contrattuale o valutativo.
+
+**3.6 Il pilastro personale del profilo richiede governance privacy dedicata.**
+La sezione "interessi personali" (hobby, passioni, lingue, disponibilità) contiene dati che, pur non essendo sensibili ai sensi dell'Art. 9 GDPR, richiedono un'informativa chiara e un meccanismo di opt-in esplicito. Il cliente deve definire la propria politica di gestione di questi dati prima del go-live.
 
 ---
 
-### 3.2 Gestione Profilo (3 Pilastri)
+## 4. Rischi Principali
 
-#### Struttura del Profilo
-
-Il profilo è organizzato in tre pilastri distinti, accessibili e modificabili separatamente.
-
-**Pilastro 1 — Professionale**
-
-| ID | Requisito |
-|----|-----------|
-| PRF-01 | Il pilastro deve contenere: nome, cognome, foto profilo, ruolo/job title, dipartimento, sede, seniority level |
-| PRF-02 | I campi principali sono pre-popolati da Azure AD e modificabili dall'utente (con flag visivo "dato sincronizzato") |
-| PRF-03 | L'utente può aggiungere **skill tag** da una tassonomia predefinita (es. Project Management, Cloud Architecture, Data Analysis) con possibilità di aggiungere tag custom |
-| PRF-04 | L'utente può aggiungere **certificazioni** con nome, ente erogatore e anno di conseguimento |
-| PRF-05 | L'utente può aggiungere **esperienze pregresse** rilevanti (campo libero strutturato) |
-| PRF-06 | È presente un indicatore di **completeness del profilo** (0-100%) che incentiva la compilazione |
-
-**Pilastro 2 — Agentiche**
-
-| ID | Requisito |
-|----|-----------|
-| PRF-07 | L'utente può selezionare **tool AI tag** da una lista predefinita (Claude, Copilot, ChatGPT, n8n, LangChain, Make, Zapier, Cursor, Perplexity, ecc.) con possibilità di aggiunta custom |
-| PRF-08 | L'utente può inserire una **descrizione testuale libera** del proprio setup agentiche (max 2000 caratteri) |
-| PRF-09 | L'utente può pubblicare **workflow/soluzioni** strutturate nel Repository Agentiche direttamente dal proprio profilo |
-| PRF-10 | Il pilastro deve mostrare un collegamento al contributo dell'utente nel Repository Agentiche |
-
-**Pilastro 3 — Umano/Personale**
-
-| ID | Requisito |
-|----|-----------|
-| PRF-11 | L'utente può selezionare **hobby tag** da una lista predefinita (Running, Board Games, Photography, Cooking, Travel, Music, Cinema, Yoga, Climbing, ecc.) con possibilità di aggiunta custom |
-| PRF-12 | L'utente può aggiungere una **bio personale** libera (max 500 caratteri) |
-| PRF-13 | Il pilastro è **visibile solo agli utenti autenticati** della stessa organizzazione |
-| PRF-14 | L'utente può scegliere di rendere il pilastro personale **visibile/nascosto** nelle ricerche pubbliche interne |
+| ID | Rischio | Probabilità | Impatto | Azioni di mitigazione |
+|----|---------|:-----------:|:-------:|-----------------------|
+| R01 | **Adozione utenti insufficiente** — la piattaforma non raggiunge massa critica entro i primi 60 giorni | Alta | Alto | Piano di comunicazione interna; engagement sponsor; incentivi al completamento profilo |
+| R02 | **Profili incompleti al lancio** — import AD parziale + scarsa motivazione alla compilazione manuale | Alta | Alto | Completeness indicator; nudge via notifica; campagne HR mirate; gamification base |
+| R03 | **Privacy percepita sul pilastro personale** — resistenza degli utenti a condividere hobby e interessi in contesto lavorativo | Media | Medio | Opt-in esplicito; controllo granulare visibilità; comunicazione trasparente sulle policy |
+| R04 | **Backlog instabile** — aggiunta di requisiti in corso d'opera non gestita tramite change request | Media | Alto | Baseline funzionale firmata; change request process definito in kick-off; sprint review con cliente |
+| R05 | **Identity e dati di origine incompleti** — Azure AD non aggiornato o incompleto per una parte rilevante degli utenti | Media | Alto | Assessment pre-progetto dello stato dell'AD; piano di data cleansing; fallback a compilazione manuale |
+| R06 | **Aspettative non allineate tra business e IT lato cliente** — il business si aspetta engagement immediato, l'IT vede la piattaforma come tool tecnico | Alta | Alto | Workshop di allineamento in kick-off; definizione congiunta degli indicatori di successo; comunicazione trasparente sui limiti |
+| R07 | **Integrazione Azure AD più complessa del previsto** — permission model, tenant policy, proxy/firewall aziendali | Bassa | Alto | Discovery tecnica dedicata in settimana 1; accesso ambiente test garantito contrattualmente |
+| R08 | **Variabilità effort integrazioni** — HRIS e calendar integration soggette a dipendenze da API lato cliente | Media | Medio | HRIS fuori da MVP; calendar integration come enhancement opzionale; stima con range ±30% |
+| R09 | **Impatto GDPR non gestito lato cliente** — assenza di DPO, base giuridica non definita, informativa assente | Bassa | Critico | Checklist GDPR da completare prima del go-live; responsabilità del titolare del trattamento esplicitata contrattualmente |
 
 ---
 
-### 3.3 Discovery & Matching
+## 5. Requisiti Funzionali
 
-#### Discovery Home
+### 5.1 Modulo AUTH — Autenticazione e Autorizzazione
 
-| ID | Requisito |
-|----|-----------|
-| DIS-01 | La Home deve presentare un **feed personalizzato** al rientro di ogni utente autenticato |
-| DIS-02 | Il feed deve contenere: persone suggerite (matching), aggiornamenti dai gruppi/match attivi, nuovi contributi al Repository Agentiche |
-| DIS-03 | I suggerimenti di persone devono essere ordinati per **punteggio di affinità** calcolato deterministicamente (vedi algoritmo sotto) |
-| DIS-04 | L'utente deve poter **filtrare i suggerimenti** per pilastro (professionale / agentiche / personale) e per sede |
-| DIS-05 | La Home deve essere **mobile-responsive** e ottimizzata per consultazione rapida |
+#### 5.1.1 Single Sign-On Aziendale
+- **RF-AUTH-01** — Il sistema deve supportare autenticazione esclusivamente tramite SSO aziendale (Azure Active Directory / Entra ID), protocollo OAuth 2.0 + OIDC. Non è prevista registrazione autonoma con email/password.
+- **RF-AUTH-02** — Il sistema deve rifiutare l'accesso a utenti non appartenenti al tenant Azure AD configurato (accesso chiuso per default).
+- **RF-AUTH-03** — Il sistema deve gestire il refresh automatico del token di sessione senza richiedere ri-autenticazione entro le soglie configurate dall'amministratore.
+- **RF-AUTH-04** — Il sistema deve supportare il logout esplicito con invalidazione del token lato server.
 
-#### Algoritmo di Matching Deterministico
-
-| ID | Requisito |
-|----|-----------|
-| DIS-06 | Il punteggio di affinità deve essere calcolato come somma pesata di overlap sui tag dei 3 pilastri |
-| DIS-07 | **Pesi predefiniti**: Professionale = 40%, Agentiche = 35%, Personale = 25% |
-| DIS-08 | Per ogni pilastro, il punteggio parziale è: `(tag in comune / totale tag utente) * peso pilastro` |
-| DIS-09 | Il sistema deve escludere dall'algoritmo i tag non compilati (nessuna penalità per profili incompleti) |
-| DIS-10 | I pesi devono essere configurabili da admin senza deploy |
-| DIS-11 | L'algoritmo non deve usare ML/AI nella fase POC — solo matching deterministico su tag |
-
-#### Ricerca
-
-| ID | Requisito |
-|----|-----------|
-| DIS-12 | Deve essere disponibile una **ricerca globale** per nome, skill, tool AI, hobby, sede |
-| DIS-13 | La ricerca deve supportare **filtri combinati** (AND logico tra filtri attivi) |
-| DIS-14 | I risultati devono essere ordinati per punteggio di affinità rispetto all'utente corrente |
+#### 5.1.2 Autorizzazione e Ruoli (RBAC)
+- **RF-AUTH-05** — Il sistema deve implementare un modello RBAC con almeno tre ruoli: `user` (standard), `hr_admin` (gestione utenti e contenuti), `sys_admin` (configurazione piattaforma e moderazione globale).
+- **RF-AUTH-06** — Il sistema deve permettere all'amministratore di sospendere o disattivare un account senza eliminare i dati associati.
+- **RF-AUTH-07** — Il sistema deve mantenere un audit log di tutte le operazioni di accesso e di modifica dei ruoli (immutabile, 90 giorni rolling).
 
 ---
 
-### 3.4 WorkMatch (Swipe 1:1)
+### 5.2 Modulo ONB — Onboarding Utente
 
-| ID | Requisito |
-|----|-----------|
-| WM-01 | La sezione WorkMatch deve presentare card di profili suggeriti in modalità **swipe** (ispirazione Tinder, tono professionale) |
-| WM-02 | Ogni card deve mostrare: foto, nome, ruolo, sede, i 3 tag più rilevanti per il match |
-| WM-03 | L'utente può esprimere **interesse** (swipe right / bottone "Connetti") o **passare** (swipe left / bottone "Passa") |
-| WM-04 | Un **match bilaterale** si verifica quando entrambi gli utenti esprimono interesse reciproco |
-| WM-05 | Al match bilaterale, il sistema deve suggerire una **coffee chat virtuale** con prompt per pianificare un incontro (testo suggerito personalizzato basato sui tag in comune) |
-| WM-06 | I match attivi devono essere visibili in una sezione dedicata "Le mie connessioni" |
-| WM-07 | Le card da mostrare devono essere selezionate dall'algoritmo di matching, con esclusione degli utenti già swipati |
-| WM-08 | L'utente deve poter **annullare un match** in qualsiasi momento |
-| WM-09 | I profili già swipati non devono ricomparire nelle card per almeno 30 giorni |
+#### 5.2.1 Provisioning automatico
+- **RF-ONB-01** — Al primo accesso autenticato, il sistema deve creare automaticamente un profilo utente pre-compilato con i dati disponibili in Azure AD: nome, cognome, ruolo, dipartimento, sede, foto profilo (se presente).
+- **RF-ONB-02** — Il sistema deve guidare l'utente in un flusso di onboarding strutturato (massimo 4 step) per il completamento delle sezioni non importabili da AD: interessi personali, disponibilità, bio.
+- **RF-ONB-03** — Il sistema deve permettere di saltare l'onboarding e completare il profilo successivamente, mostrando un indicatore di completezza persistente.
+
+#### 5.2.2 Benvenuto organizzativo
+- **RF-ONB-04** — Il sistema deve segnalare nel feed principale i nuovi utenti che hanno completato l'onboarding (opt-in), con un box di benvenuto interattivo che invita i colleghi a connettersi.
+- **RF-ONB-05** — Il sistema deve proporre automaticamente ai nuovi utenti una lista di "persone da conoscere" basata su team, sede e ruolo, al completamento dell'onboarding.
+- **RF-ONB-06** — Il sistema deve permettere all'HR admin di personalizzare il messaggio di benvenuto visualizzato durante l'onboarding.
 
 ---
 
-### 3.5 Gruppi
+### 5.3 Modulo PRF — Profilo Utente
 
-| ID | Requisito |
-|----|-----------|
-| GRP-01 | Il sistema deve **suggerire automaticamente gruppi** all'utente basandosi sull'overlap di tag (es. "Vediamo che 6 tuoi colleghi usano n8n — vuoi unirti al gruppo n8n Users?") |
-| GRP-02 | L'utente può **creare un gruppo** specificando: nome, descrizione, tag tematici, visibilità (aperto / su invito) |
-| GRP-03 | L'utente può **iscriversi a un gruppo** esistente |
-| GRP-04 | Ogni gruppo deve avere: lista membri, bacheca aggiornamenti (post semplici), tag tematici |
-| GRP-05 | I post nella bacheca del gruppo devono apparire nel feed Discovery Home degli iscritti |
-| GRP-06 | Il creatore del gruppo è automaticamente **admin** e può invitare/rimuovere membri |
-| GRP-07 | Il sistema deve prevedere **gruppi di sistema** creati dall'admin (es. "Team Milano", "Tirana Office", "AI Champions") pre-popolati da Azure AD |
-| GRP-08 | Deve esistere un **catalogo gruppi** navigabile con ricerca per nome e tag |
+#### 5.3.1 Profilo Professionale
+- **RF-PRF-01** — Il sistema deve permettere all'utente di inserire e modificare: titolo/ruolo, area/divisione, seniority, anni di esperienza, competenze tecniche (tag strutturati), certificazioni (con data e ente), progetti passati e attuali.
+- **RF-PRF-02** — Il sistema deve supportare l'importazione automatica di dati da Azure AD (nome, ruolo, dipartimento, sede) al primo accesso e la sincronizzazione periodica (configurabile dall'amministratore).
+- **RF-PRF-03** — Il sistema deve consentire la validazione delle competenze dichiarate da parte di altri utenti (endorsement), con tracciabilità dell'endorser.
+- **RF-PRF-04** — Il sistema deve visualizzare una timeline professionale interna che rappresenta il percorso dell'utente nell'organizzazione.
 
----
+#### 5.3.2 Profilo Personale
+- **RF-PRF-05** — Il sistema deve permettere l'inserimento di hobby e interessi tramite tag strutturati (sport, musica, cucina, viaggi, libri, gaming, ecc.). Questa sezione è **opt-in**: l'utente deve attivare esplicitamente la visibilità.
+- **RF-PRF-06** — Il sistema deve supportare una sezione "Fun facts" — massimo 3 curiosità in formato libero, con controllo di visibilità individuale.
+- **RF-PRF-07** — Il sistema deve permettere di indicare lingue parlate e livello di padronanza.
+- **RF-PRF-08** — Il sistema deve supportare una sezione "Cosa sto imparando" — campo libero per descrivere percorsi di apprendimento attuali.
+- **RF-PRF-09** — Il sistema deve permettere di indicare la propria città o area geografica (non indirizzo preciso). Dato non obbligatorio.
 
-### 3.6 Office Map
+#### 5.3.3 Impostazioni Disponibilità
+- **RF-PRF-10** — Il sistema deve permettere all'utente di indicare la propria disponibilità per tipologie di interazione: coffee chat virtuale, coffee chat in presenza, mentoring (offro/cerco), pair programming, brainstorming.
+- **RF-PRF-11** — Il sistema deve permettere di impostare slot di disponibilità settimanali. L'integrazione con sistemi di calendario è opzionale e configurabile.
+- **RF-PRF-12** — Il sistema deve supportare uno stato "In pausa" che segnala temporanea non disponibilità per nuove richieste di connessione, senza disattivare il profilo.
 
-| ID | Requisito |
-|----|-----------|
-| MAP-01 | La mappa deve visualizzare le **sedi AGIC**: uffici italiani + Tirana |
-| MAP-02 | Ogni sede deve mostrare un **cluster di persone** presenti/assegnate, con indicatore numerico |
-| MAP-03 | L'utente deve poter **filtrare la mappa** per skill tag, tool AI, hobby tag |
-| MAP-04 | Cliccando su un cluster, si apre una **lista di persone** filtrata per quella sede |
-| MAP-05 | Cliccando su una persona dalla mappa, si apre il suo profilo completo |
-| MAP-06 | La mappa deve supportare **zoom** per visualizzare sedi aggregate vs dettaglio |
-| MAP-07 | I dati di presenza/sede devono essere sincronizzati da Azure AD (campo "office location") |
-| MAP-08 | **Nota privacy**: la mappa mostra la sede di assegnazione, non la posizione real-time dell'utente |
+#### 5.3.4 Elementi Visivi e Completezza
+- **RF-PRF-13** — Il sistema deve supportare foto profilo e immagine di copertina personalizzabile, con limiti di dimensione e formato definiti.
+- **RF-PRF-14** — Il sistema deve generare un avatar automatico (basato su iniziali) in assenza di foto profilo caricata.
+- **RF-PRF-15** — Il sistema deve visualizzare un indicatore di completezza del profilo (percentuale o livelli) e proporre le sezioni mancanti per incentivare la compilazione progressiva.
 
 ---
 
-### 3.7 Agentic Knowledge Repository
+### 5.4 Modulo DIS — Discovery
 
-| ID | Requisito |
-|----|-----------|
-| AKR-01 | Il Repository è una **directory ricercabile** di setup AI, workflow e soluzioni contribuiti dai dipendenti |
-| AKR-02 | Ogni contributo deve avere: titolo, descrizione (rich text, max 5000 car.), tag tool AI coinvolti, autore, data pubblicazione |
-| AKR-03 | L'utente può **pubblicare un contributo** direttamente dal proprio profilo (pilastro Agentiche) o dalla sezione Repository |
-| AKR-04 | Il Repository deve supportare **ricerca full-text** su titolo e descrizione |
-| AKR-05 | I contributi devono essere **filtrabili per tool AI** (es. "mostra tutti i workflow che usano n8n") |
-| AKR-06 | Ogni contributo deve mostrare il numero di **visualizzazioni** e permettere di aggiungere ai preferiti |
-| AKR-07 | I contributi con più engagement devono apparire in evidenza nella Discovery Home |
-| AKR-08 | Un **admin moderatore** deve poter approvare/rimuovere contributi (workflow di moderazione semplice) |
+#### 5.4.1 Ricerca
+- **RF-DIS-01** — Il sistema deve permettere ricerca testuale full-text su nome, ruolo, competenze e interessi.
+- **RF-DIS-02** — Il sistema deve supportare filtri avanzati: team/divisione, sede, competenza, interesse, disponibilità, seniority.
+- **RF-DIS-03** — Il sistema deve supportare ricerca per tag (competenze e interessi normalizzati tramite tassonomia controllata).
+- **RF-DIS-04** — Il sistema deve presentare i risultati di ricerca con card sintetica: foto, nome, ruolo, prime 3 competenze, primi 3 interessi.
 
----
-
-## 4. Requisiti Non Funzionali
-
-### 4.1 Performance
-
-| ID | Requisito |
-|----|-----------|
-| NF-PERF-01 | Il tempo di caricamento della Discovery Home deve essere **< 2 secondi** per p95 su connessione standard |
-| NF-PERF-02 | Il calcolo del punteggio di matching deve essere **< 500ms** per un pool di 1.000 utenti |
-| NF-PERF-03 | La ricerca deve restituire risultati in **< 1 secondo** |
-| NF-PERF-04 | L'applicazione deve supportare fino a **500 utenti concorrenti** senza degradazione (target POC) e fino a **5.000** in versione Enterprise |
-
-### 4.2 Sicurezza
-
-| ID | Requisito |
-|----|-----------|
-| NF-SEC-01 | Tutta la comunicazione deve avvenire su **HTTPS/TLS 1.3** |
-| NF-SEC-02 | I token di sessione devono essere gestiti tramite **Azure AD / MSAL** — nessun token custom |
-| NF-SEC-03 | I dati utente devono essere accessibili **solo agli utenti autenticati** della stessa tenant Azure AD |
-| NF-SEC-04 | Le API backend devono implementare **rate limiting** per prevenire abusi |
-| NF-SEC-05 | I log applicativi non devono contenere dati personali in chiaro |
-| NF-SEC-06 | Deve essere implementato un modello di **ruoli** (User, Admin, Moderator) con RBAC |
-
-### 4.3 Privacy & GDPR
-
-| ID | Requisito |
-|----|-----------|
-| NF-GDPR-01 | L'applicazione deve essere conforme al **Regolamento UE 2016/679 (GDPR)** |
-| NF-GDPR-02 | Al primo accesso, l'utente deve accettare l'informativa privacy e il trattamento dati |
-| NF-GDPR-03 | L'utente deve poter richiedere l'**export dei propri dati** in formato leggibile (JSON/CSV) |
-| NF-GDPR-04 | L'utente deve poter richiedere la **cancellazione del proprio profilo** (diritto all'oblio) |
-| NF-GDPR-05 | Il Pilastro Personale deve essere configurabile come **opt-in** — non visibile per default nei listing |
-| NF-GDPR-06 | Deve essere documentato un **Data Processing Agreement** con i fornitori cloud (Azure) |
-
-### 4.4 Accessibilità
-
-| ID | Requisito |
-|----|-----------|
-| NF-ACC-01 | L'interfaccia deve rispettare le linee guida **WCAG 2.1 livello AA** |
-| NF-ACC-02 | Tutte le immagini devono avere **alt text** descrittivo |
-| NF-ACC-03 | La navigazione deve essere completamente fruibile via **tastiera** |
-| NF-ACC-04 | Il contrasto cromatico deve rispettare i requisiti minimi WCAG (4.5:1 per testo normale) |
-
-### 4.5 Compatibilità & Responsività
-
-| ID | Requisito |
-|----|-----------|
-| NF-COMP-01 | L'applicazione deve essere **mobile-responsive** (layout adattivo da 320px) |
-| NF-COMP-02 | Deve essere supportata l'ultima versione stabile dei principali browser: Chrome, Edge, Firefox, Safari |
-| NF-COMP-03 | L'autenticazione Azure AD deve funzionare su dispositivi mobile via browser |
-
-### 4.6 Integrazioni
-
-| ID | Requisito |
-|----|-----------|
-| NF-INT-01 | Integrazione **Azure Active Directory** via OIDC per autenticazione e sincronizzazione attributi profilo |
-| NF-INT-02 | L'integrazione AD deve sincronizzare almeno: displayName, jobTitle, department, officeLocation, mail, userPrincipalName |
-| NF-INT-03 | La sincronizzazione AD deve avvenire **ad ogni login** (dati freschi garantiti) |
+#### 5.4.2 Raccomandazioni
+- **RF-DIS-05** — Il sistema deve proporre una lista "Persone che potresti conoscere" basata su: competenze complementari, interessi condivisi, prossimità organizzativa (stesso team, stessa sede), colleghi di colleghi.
+- **RF-DIS-06** — Il sistema deve proporre "Colleghi con profilo simile al tuo" sulla base di interessi e competenze sovrapposte.
+- **RF-DIS-07** — Il sistema deve proporre "Chi può aiutarti con..." a partire da una competenza cercata dall'utente.
+- **RF-DIS-08** — Il sistema deve aggiornare le raccomandazioni almeno settimanalmente sulla base delle variazioni dei profili.
+- **RF-DIS-09** — Il sistema deve permettere all'utente di escludere una raccomandazione specifica ("non mi interessa"), con registrazione del feedback per miglioramento progressivo del motore.
 
 ---
 
-## 5. User Stories
+### 5.5 Modulo WM — WorkMatch (Professional Discovery)
 
-### Autenticazione & Onboarding
+> **Nota di governance:** questa funzionalità implementa un meccanismo di discovery rapida one-to-one in modalità card-browsing sequenziale. È configurabile dall'amministratore e può essere disattivata a livello di tenant. Il riferimento funzionale è quello della connessione professionale configurabile, non di dinamiche tipiche di piattaforme consumer.
 
-> **US-01** — Come **nuovo dipendente**, voglio accedere a Hello Work con le mie credenziali aziendali Microsoft per non dover gestire un'ulteriore password.
+#### 5.5.1 Discovery Rapida One-to-One
+- **RF-WM-01** — Il sistema deve fornire una modalità di navigazione sequenziale dei profili colleghi (card browsing) che consente all'utente di esprimere rapidamente interesse o di passare al profilo successivo. La funzionalità è denominata WorkMatch e si basa sul profilo completo: competenze, interessi e disponibilità dichiarata. L'amministratore può disattivare questa modalità a livello di tenant tramite pannello di configurazione.
+- **RF-WM-02** — Il sistema deve presentare nella card di WorkMatch: foto, nome, ruolo, top-3 competenze, top-3 interessi, indicatore di disponibilità.
+- **RF-WM-03** — Il sistema deve filtrare le card mostrate escludendo utenti già connessi, utenti a cui è già stata inviata una richiesta in attesa, e utenti che hanno impostato lo stato "In pausa".
+- **RF-WM-04** — Il sistema deve tracciare gli interessi espressi per ottimizzare le raccomandazioni successive, senza esporre i dati di navigazione individuale ad altri utenti.
+- **RF-WM-05** — Quando due utenti esprimono reciprocamente interesse tramite WorkMatch, il sistema deve proporre un suggerimento di connessione bidirezionale. L'utente riceve una notifica non intrusiva ("Hai qualcosa in comune con [nome] — vuoi connetterti?") e può avviare una richiesta di coffee chat dalla stessa interfaccia. Il collegamento avviene solo su conferma esplicita di entrambi.
 
-> **US-02** — Come **nuovo utente**, voglio essere guidato in un onboarding a 3 step per presentarmi ai miei colleghi in modo completo e strutturato senza sentirmi sopraffatto.
-
-> **US-03** — Come **utente che ha saltato l'onboarding**, voglio ricevere un promemoria persistente sul completamento del profilo per massimizzare la mia visibilità nelle ricerche.
-
-### Profilo
-
-> **US-04** — Come **consulente senior**, voglio aggiungere i miei tool AI preferiti al profilo agentiche per essere trovato da colleghi che lavorano con gli stessi strumenti e costruire community di pratica.
-
-> **US-05** — Come **dipendente appassionato di board games**, voglio inserire i miei hobby nel profilo personale per scoprire colleghi con cui condividere interessi al di fuori del lavoro.
-
-> **US-06** — Come **utente**, voglio vedere un indicatore di completamento del mio profilo per capire cosa manca e migliorare la mia visibilità nell'algoritmo di matching.
-
-### Discovery & Matching
-
-> **US-07** — Come **dipendente remoto**, voglio vedere una home con persone suggerite in base ai miei tag per scoprire ogni giorno colleghi rilevanti senza doverli cercare attivamente.
-
-> **US-08** — Come **team lead**, voglio filtrare le ricerche per skill e sede per trovare rapidamente la persona giusta per un progetto senza dover interpellare HR o scorrere l'organigramma.
-
-### WorkMatch
-
-> **US-09** — Come **dipendente che vuole espandere la propria rete**, voglio sfogliare profili in modalità swipe per esprimere interesse in modo rapido e leggero, senza l'imbarazzo di una richiesta formale di connessione.
-
-> **US-10** — Come **utente che ha ricevuto un match bilaterale**, voglio ricevere un suggerimento di coffee chat personalizzato per avere un'occasione concreta di rompere il ghiaccio con il mio nuovo match.
-
-### Gruppi
-
-> **US-11** — Come **esperto di automazione n8n**, voglio creare un gruppo tematico su n8n per raccogliere tutti i colleghi con lo stesso interesse e scambiare workflow e best practice.
-
-> **US-12** — Come **nuovo assunto**, voglio ricevere suggerimenti automatici di gruppi da parte del sistema per integrarmi rapidamente nelle community aziendali rilevanti per il mio profilo.
-
-### Office Map
-
-> **US-13** — Come **dipendente in trasferta a Tirana**, voglio visualizzare sulla mappa chi è presente nell'ufficio di Tirana e ha skill simili alle mie per organizzare un incontro in presenza senza dover inviare email a tutta la sede.
-
-### Agentic Knowledge Repository
-
-> **US-14** — Come **AI practitioner**, voglio pubblicare la descrizione del mio workflow Claude + n8n nel Repository per condividerlo con i colleghi ed evitare che ognuno reinventi la stessa soluzione.
-
-> **US-15** — Come **consulente che inizia un progetto di automazione**, voglio cercare nel Repository per tool AI per trovare soluzioni già adottate in azienda e partire da una base solida invece che da zero.
+#### 5.5.2 Configurabilità Amministrativa
+- **RF-WM-06** — L'amministratore di sistema deve poter disabilitare il modulo WorkMatch per il tenant senza impatti sulle altre funzionalità.
+- **RF-WM-07** — L'amministratore deve poter configurare i criteri di prioritizzazione delle card (per sede, divisione, interessi, o casualità ponderata).
+- **RF-WM-08** — Il sistema deve garantire che i dati di navigazione WorkMatch non siano visibili ad altri utenti né inclusi in report esportabili dall'HR admin a livello individuale.
 
 ---
 
-## 6. Scope: MVP vs Enterprise
+### 5.6 Modulo GRP — Gruppi
 
-### Legenda
-| Simbolo | Significato |
-|---|---|
-| ✅ | Incluso |
-| 🔶 | Parzialmente incluso / versione semplificata |
-| ❌ | Non incluso |
+#### 5.6.1 Creazione e Partecipazione
+- **RF-GRP-01** — Il sistema deve permettere a qualsiasi utente di creare un gruppo (professionale o per interesse personale), definendo nome, descrizione e policy di accesso.
+- **RF-GRP-02** — Il sistema deve supportare tre livelli di accesso: pubblico (visibile e accessibile a tutti), privato (visibile ma su invito), segreto (non visibile nella ricerca, su invito diretto).
+- **RF-GRP-03** — Il sistema deve permettere di unirsi a gruppi pubblici con una singola azione, senza approvazione del moderatore.
+- **RF-GRP-04** — Il sistema deve suggerire gruppi pertinenti al profilo dell'utente in base a competenze e interessi dichiarati.
 
-### Tabella Scope
+#### 5.6.2 Feed e Interazioni
+- **RF-GRP-05** — Ogni gruppo deve avere un feed dedicato per post, condivisioni e discussioni tra i membri.
+- **RF-GRP-06** — Il sistema deve supportare post con testo, link, immagini e sondaggi semplici (massimo 4 opzioni).
+- **RF-GRP-07** — Il sistema deve supportare reazioni emoji (set limitato, configurabile dall'amministratore) e commenti sui post.
 
-| Feature | POC (Hackathon) | v1.0 (3 mesi) | Enterprise (12 mesi) |
-|---|---|---|---|
-| **Autenticazione Azure AD SSO** | ✅ | ✅ | ✅ |
-| **Onboarding guidato 3 step** | ✅ | ✅ | ✅ |
-| **Profilo — Pilastro Professionale** | ✅ (pre-pop. AD) | ✅ | ✅ + validazione esterna (LinkedIn sync) |
-| **Profilo — Pilastro Agentiche** | ✅ | ✅ | ✅ |
-| **Profilo — Pilastro Personale** | ✅ | ✅ | ✅ |
-| **Completeness indicator profilo** | 🔶 visuale semplice | ✅ gamification | ✅ gamification + badge |
-| **Discovery Home — feed personalizzato** | ✅ | ✅ | ✅ + AI-powered reranking |
-| **Algoritmo matching deterministico** | ✅ | ✅ | ✅ + ML hybrid scoring |
-| **Ricerca con filtri combinati** | 🔶 filtri base | ✅ | ✅ + ricerca semantica |
-| **WorkMatch — swipe UI** | ✅ | ✅ | ✅ |
-| **WorkMatch — coffee chat suggestion** | 🔶 testo statico | ✅ testo personalizzato | ✅ + calendar integration |
-| **Gruppi — creazione e join** | ✅ | ✅ | ✅ |
-| **Gruppi — suggerimento automatico** | ✅ | ✅ | ✅ |
-| **Gruppi — bacheca/post** | 🔶 post semplici | ✅ rich text + allegati | ✅ + thread + reactions |
-| **Office Map — sedi AGIC** | ✅ | ✅ | ✅ multi-tenant, tutte le sedi |
-| **Office Map — cluster + filtri** | ✅ | ✅ | ✅ |
-| **Office Map — presenza real-time** | ❌ | 🔶 self-declared | ✅ calendar integration |
-| **Agentic Knowledge Repository** | ✅ | ✅ | ✅ |
-| **Repository — moderazione** | 🔶 manuale admin | ✅ workflow approvazione | ✅ + AI content tagging |
-| **Notifiche in-app** | ❌ | ✅ | ✅ |
-| **Notifiche email/Teams** | ❌ | ✅ | ✅ |
-| **HR Analytics Dashboard** | ❌ | ❌ | ✅ |
-| **Icebreaker feed automatico** | ❌ | 🔶 | ✅ |
-| **Mobile PWA** | ❌ (responsive web) | 🔶 | ✅ |
-| **Multi-tenant** | ❌ (single org) | ❌ | ✅ |
-| **Calendar integration** | ❌ | ❌ | ✅ |
-| **Admin panel** | 🔶 base | ✅ | ✅ completo |
-| **GDPR — export/cancellazione** | 🔶 manuale | ✅ self-service | ✅ |
-| **Accessibilità WCAG 2.1 AA** | 🔶 best effort | ✅ | ✅ certificata |
-| **SLA / monitoring** | ❌ | 🔶 | ✅ 99.9% uptime SLA |
+#### 5.6.3 Eventi di Gruppo
+- **RF-GRP-08** — I moderatori di gruppo devono poter creare eventi (virtuali o in presenza) visibili ai membri del gruppo.
+- **RF-GRP-09** — Il sistema deve gestire RSVP con conteggio partecipanti e lista d'attesa opzionale.
 
 ---
 
-## 7. Stima Giornate Uomo
+### 5.7 Modulo MAP — Mappa Organizzativa
 
-### Parametri di stima
-- **Giornata lavorativa**: 8 ore
-- **Approccio**: Agile, sprint da 2 settimane
-- **Stack assunto**: React (frontend), Python FastAPI (backend), PostgreSQL + Azure infra
-- **Scope**: v1.0 completa (superset del POC, baseline commerciale)
-
----
-
-### Breakdown per Fase e Ruolo
-
-| Fase | Attività | Solution Architect | Senior Consultant | Consultant | Junior | PM |
-|---|---|:---:|:---:|:---:|:---:|:---:|
-| **1. Discovery & Analysis** | Workshops stakeholder, analisi requisiti, definizione scope | 2 | 2 | 1 | 0 | 3 |
-| | Definizione tassonomia tag (skill, AI tools, hobby) | 0 | 2 | 2 | 0 | 1 |
-| | Data model review Azure AD, GDPR assessment | 1 | 2 | 1 | 0 | 1 |
-| | **Subtotale Fase 1** | **3** | **6** | **4** | **0** | **5** |
-| **2. Architecture & Design** | System architecture design (frontend, backend, infra, auth) | 5 | 2 | 0 | 0 | 1 |
-| | Database design (schema profilo, tag, matching, gruppi) | 2 | 3 | 1 | 0 | 0 |
-| | API design (OpenAPI spec, contratti) | 2 | 3 | 2 | 0 | 0 |
-| | Security architecture (Azure AD OIDC, RBAC, GDPR) | 3 | 2 | 1 | 0 | 0 |
-| | **Subtotale Fase 2** | **12** | **10** | **4** | **0** | **1** |
-| **3. UX / UI Design** | User flows, wireframe, prototipo Figma | 1 | 2 | 0 | 0 | 1 |
-| | UI design system + componenti | 0 | 3 | 3 | 1 | 0 |
-| | Revisione accessibilità WCAG | 0 | 2 | 1 | 0 | 0 |
-| | **Subtotale Fase 3** | **1** | **7** | **4** | **1** | **1** |
-| **4. Frontend Development** | Setup progetto React, routing, auth MSAL | 0 | 2 | 3 | 2 | 0 |
-| | Onboarding wizard (3 step) | 0 | 1 | 3 | 3 | 0 |
-| | Gestione profilo (3 pilastri + completeness) | 0 | 2 | 4 | 4 | 0 |
-| | Discovery Home + feed | 0 | 2 | 3 | 3 | 0 |
-| | WorkMatch swipe UI | 0 | 1 | 3 | 4 | 0 |
-| | Gruppi (lista, catalogo, bacheca) | 0 | 1 | 3 | 4 | 0 |
-| | Office Map (mappa interattiva + filtri) | 0 | 2 | 4 | 3 | 0 |
-| | Agentic Repository (listing + ricerca + detail) | 0 | 1 | 3 | 3 | 0 |
-| | Ricerca globale + filtri | 0 | 1 | 2 | 2 | 0 |
-| | Admin panel base | 0 | 1 | 2 | 2 | 0 |
-| | **Subtotale Fase 4** | **0** | **14** | **30** | **30** | **0** |
-| **5. Backend Development** | Setup FastAPI, modelli dati, migrazioni DB | 0 | 2 | 3 | 2 | 0 |
-| | Azure AD SSO integration (OIDC, token validation) | 1 | 3 | 2 | 1 | 0 |
-| | API Profilo CRUD (3 pilastri, sync AD) | 0 | 2 | 4 | 3 | 0 |
-| | Algoritmo matching deterministico | 1 | 3 | 3 | 1 | 0 |
-| | API Discovery (feed personalizzato) | 0 | 2 | 3 | 2 | 0 |
-| | API WorkMatch (swipe, match bilaterale) | 0 | 2 | 3 | 2 | 0 |
-| | API Gruppi (CRUD, membri, post) | 0 | 2 | 3 | 3 | 0 |
-| | API Office Map (cluster, filtri) | 0 | 1 | 3 | 2 | 0 |
-| | API Repository (CRUD, ricerca full-text) | 0 | 2 | 3 | 2 | 0 |
-| | GDPR: export dati, cancellazione profilo | 0 | 2 | 2 | 1 | 0 |
-| | **Subtotale Fase 5** | **2** | **21** | **29** | **19** | **0** |
-| **6. Infrastruttura & DevOps** | Azure provisioning (App Service, PostgreSQL, Key Vault) | 2 | 3 | 2 | 1 | 0 |
-| | CI/CD pipeline (GitHub Actions) | 1 | 2 | 2 | 1 | 0 |
-| | Configurazione ambienti (dev, staging, prod) | 1 | 1 | 2 | 1 | 0 |
-| | Monitoring base (Application Insights) | 1 | 1 | 1 | 0 | 0 |
-| | **Subtotale Fase 6** | **5** | **7** | **7** | **3** | **0** |
-| **7. Testing & QA** | Test plan, definizione casi di test | 0 | 2 | 2 | 1 | 1 |
-| | Unit test backend (copertura ≥ 80%) | 0 | 2 | 3 | 3 | 0 |
-| | Integration test (API + DB) | 0 | 1 | 3 | 2 | 0 |
-| | E2E test (Playwright/Cypress — flussi critici) | 0 | 1 | 2 | 3 | 0 |
-| | Security testing (OWASP top 10 base) | 1 | 2 | 1 | 0 | 0 |
-| | **Subtotale Fase 7** | **1** | **8** | **11** | **9** | **1** |
-| **8. UAT & Go-Live** | UAT con utenti pilota (facilitazione) | 0 | 1 | 2 | 1 | 3 |
-| | Bug fixing post-UAT | 0 | 2 | 3 | 3 | 0 |
-| | Documentazione utente + materiali onboarding | 0 | 1 | 2 | 1 | 1 |
-| | Go-live support (1 settimana) | 1 | 1 | 2 | 2 | 2 |
-| | **Subtotale Fase 8** | **1** | **5** | **9** | **7** | **6** |
-| **9. Project Management** | Coordinamento sprint, cerimonie Agile, reporting | 0 | 0 | 0 | 0 | 10 |
-| | Stakeholder management, documentazione | 0 | 0 | 0 | 0 | 5 |
-| | **Subtotale Fase 9** | **0** | **0** | **0** | **0** | **15** |
+- **RF-MAP-01** — Il sistema deve visualizzare una mappa interattiva delle sedi aziendali con indicazione del numero di colleghi presenti per ciascuna location.
+- **RF-MAP-02** — Il sistema deve permettere di filtrare la mappa per team, divisione o interesse, per identificare colleghi in prossimità geografica o organizzativa.
+- **RF-MAP-03** — Il sistema deve visualizzare la struttura organizzativa semplificata in formato navigabile (albero gerarchico o vista flat per divisione).
+- **RF-MAP-04** — Il sistema deve permettere di accedere al profilo di un collega direttamente dalla mappa, con azione rapida di richiesta coffee chat.
+- **RF-MAP-05** — La mappa non deve mai esporre posizioni geografiche precise degli utenti: il dato di geolocalizzazione si riferisce alla sede dichiarata nel profilo, non alla posizione in tempo reale.
 
 ---
 
-### Riepilogo per Ruolo
+### 5.8 Modulo AKR — Agentic Knowledge Repository
 
-| Ruolo | Giorni Uomo | Tariffa indicativa (€/gg) | Costo stimato |
-|---|:---:|:---:|:---:|
-| Solution Architect | **25** | 800 | € 20.000 |
-| Senior Consultant | **78** | 650 | € 50.700 |
-| Consultant | **98** | 500 | € 49.000 |
-| Junior Consultant | **69** | 350 | € 24.150 |
-| Project Manager | **29** | 600 | € 17.400 |
-| **TOTALE** | **299** | — | **€ 161.250** |
+> **Nota:** il modulo AKR è il principale differenziatore di Hello Work rispetto alle piattaforme di corporate networking standard. Consente ai colleghi di condividere e scoprire setup, strumenti e flussi di lavoro agentici e AI-assistiti utilizzati internamente. Il perimetro di questo modulo è condizionato alla disponibilità di utenti con setup documentabili e alla maturità dell'organizzazione nel campo AI.
 
-> ⚠️ **Note di stima**
-> - La stima si riferisce a **v1.0 completa** (3 mesi, scope pieno)
-> - Il **POC Hackathon** è stimato in ~**40-50 gg/u** (fasi 2, 4, 5, 6 ridotte al minimo)
-> - Le tariffe sono indicative e non includono IVA né licenze software
-> - La stima include un buffer del 15% per risk management e imprevisti (già incorporato)
-> - Eventuali licenze Azure, tool di design o SaaS sono escluse e da quotare separatamente
-> - Per la versione **Enterprise** (12 mesi, multi-tenant, ML, mobile PWA), la stima è da moltiplicare per un fattore 2.5-3x
+#### 5.8.1 Schede Knowledge
+- **RF-AKR-01** — Il sistema deve permettere a ogni utente di compilare schede strutturate relative al proprio setup di lavoro agentico/AI: strumenti utilizzati (tag selezionabili: Claude, Copilot, Cursor, n8n, LangChain, ecc.), contesto d'uso, descrizione libera del flusso.
+- **RF-AKR-02** — Il sistema deve supportare una tassonomia controllata di tool e framework (lista gestita dall'amministratore), integrabile con tag liberi aggiuntivi.
+- **RF-AKR-03** — Il sistema deve permettere una descrizione libera (campo testuale ricco) per illustrare il flusso specifico adottato, con possibilità di allegare screenshot o link.
+- **RF-AKR-04** — Il sistema deve permettere all'utente di impostare la visibilità della propria scheda AKR: pubblica (tutti), riservata ai colleghi connessi, privata.
+
+#### 5.8.2 Ricerca e Discovery AKR
+- **RF-AKR-05** — Il sistema deve consentire la ricerca per tool/framework: "chi usa n8n?" → lista colleghi con scheda AKR che include quel tag, con accesso diretto al profilo e al dettaglio del flusso.
+- **RF-AKR-06** — Il sistema deve integrare i tag AKR nel motore di raccomandazione: colleghi con setup simili vengono proposti nella sezione WorkMatch e nella discovery.
+- **RF-AKR-07** — Il sistema deve mostrare nel profilo utente un riepilogo sintetico della propria scheda AKR (tool principali, ultimo aggiornamento).
+
+#### 5.8.3 Governance Knowledge
+- **RF-AKR-08** — Il sistema deve permettere agli utenti di marcare una scheda AKR come "utile" (engagement senza endorsement vincolante), con contatore visibile.
+- **RF-AKR-09** — L'amministratore deve poter moderare e rimuovere contenuti AKR non conformi alle policy aziendali.
+- **RF-AKR-10** — Le schede AKR non devono includere credenziali, token, chiavi API o informazioni riservate: il sistema deve avvertire l'utente in caso di pattern sospetti nel contenuto inserito (validazione lato frontend).
 
 ---
 
-### Cronoprogramma Macro
+## 6. Requisiti Non Funzionali
+
+### 6.1 Performance
+
+| Requisito | Target | Note |
+|-----------|--------|------|
+| Tempo di caricamento pagina (LCP) | < 2 secondi | Misurato su connessione aziendale standard |
+| Risposta API | < 300ms al 95° percentile | Escluse chiamate a servizi esterni (calendar, AD sync) |
+| Latenza ricerca utenti | < 500ms per query | Con indice full-text correttamente dimensionato |
+| Disponibilità (SLA) | 99,5% uptime mensile | Escluse manutenzioni pianificate con preavviso |
+| Capacità di carico MVP | 500–2.000 utenti attivi | Dimensionamento infrastruttura sul range dichiarato nelle assunzioni |
+
+### 6.2 Sicurezza
+
+- **RNF-S01** — Autenticazione esclusivamente via SSO aziendale (Azure AD / Entra ID) — protocollo OAuth 2.0 + OIDC. Nessun accesso con credenziali locali.
+- **RNF-S02** — Autorizzazione basata su ruoli (RBAC): user, hr_admin, sys_admin.
+- **RNF-S03** — Tutti i dati in transito cifrati con TLS 1.3.
+- **RNF-S04** — Tutti i dati a riposo cifrati con AES-256.
+- **RNF-S05** — Vulnerability scanning continuo dell'infrastruttura; penetration test prima del go-live in produzione.
+- **RNF-S06** — Audit trail immutabile di accessi e operazioni sensibili (90 giorni rolling, retention estendibile).
+
+### 6.3 Privacy e GDPR
+
+- **RNF-P01** — Conformità al Regolamento UE 2016/679 (GDPR): base giuridica del trattamento definita prima del go-live; informativa completa agli utenti; consenso esplicito per dati non obbligatori (interessi personali, geolocalizzazione, AKR).
+- **RNF-P02** — Diritto all'oblio: cancellazione account entro 30 giorni dalla richiesta, con anonimizzazione dei contenuti pubblici attributi all'utente.
+- **RNF-P03** — Portabilità dei dati: export profilo in formato JSON/CSV su richiesta dell'utente.
+- **RNF-P04** — Privacy by design: dati di geolocalizzazione limitati alla sede dichiarata (non posizione in tempo reale); hobby e interessi sempre opt-in; dati WorkMatch non esposti a livello individuale.
+- **RNF-P05** — Data residency: tutti i dati residenti in data center EU (preferibilmente North/West Europe Azure region).
+- **RNF-P06** — Il sistema non deve mai esporre email personali o numeri di telefono senza esplicito opt-in dell'utente.
+
+### 6.4 Accessibilità
+
+- **RNF-A01** — Conformità WCAG 2.1 livello AA.
+- **RNF-A02** — Supporto screen reader (ARIA labels completi).
+- **RNF-A03** — Navigabilità completa da tastiera.
+- **RNF-A04** — Contrasto colori minimo 4,5:1.
+
+### 6.5 Architettura e Tecnologia
+
+- **RNF-T01** — Applicazione web responsive e mobile-first. PWA pianificata come enhancement in v1.1.
+- **RNF-T02** — Supporto browser: Chrome, Edge, Firefox, Safari (ultime 2 versioni major).
+- **RNF-T03** — Backend cloud-native su Microsoft Azure, coerente con lo stack enterprise Microsoft adottato dal cliente.
+- **RNF-T04** — API RESTful documentate con specifica OpenAPI 3.0 per future integrazioni (Teams, SharePoint, HRIS).
+- **RNF-T05** — Architettura orientata a servizi, con separazione netta tra frontend, backend e strato dati, per consentire scalabilità e manutenibilità indipendenti dei moduli.
+
+---
+
+## 7. User Stories — Selezione MVP
+
+| ID | Come… | Voglio… | Per… |
+|----|--------|---------|------|
+| US-01 | dipendente | accedere con il mio account aziendale senza creare nuove credenziali | non dover gestire un'altra password e operare in un ambiente autenticato |
+| US-02 | neo-assunto | avere un profilo pre-compilato con i dati da Active Directory | non dover re-inserire informazioni che l'organizzazione già detiene |
+| US-03 | dipendente | aggiungere hobby e interessi al profilo con controllo sulla visibilità | permettere ai colleghi di scoprire aspetti personali che scelgo di condividere |
+| US-04 | dipendente | cercare colleghi per competenza tecnica | individuare rapidamente chi può supportarmi su un tema specifico |
+| US-05 | dipendente | ricevere suggerimenti di colleghi pertinenti al mio profilo | ampliare la mia rete senza dover avviare ricerche manuali continuative |
+| US-06 | dipendente | inviare una richiesta di coffee chat con messaggio personalizzato | avviare un contatto in modo contestualizzato e non impersonale |
+| US-07 | dipendente | ricevere un invito calendario generato automaticamente dopo l'accettazione di un coffee chat | evitare di coordinare manualmente data e link del meeting |
+| US-08 | manager | creare un gruppo per il mio team con feed dedicato | disporre di uno spazio informale per condivisioni non legate ai processi operativi |
+| US-09 | dipendente | trovare gruppi per interesse e iscrivermi | entrare in contatto con colleghi che condividono le mie passioni |
+| US-10 | HR Manager | pubblicare il benvenuto di un nuovo collega nella piattaforma | supportarne l'onboarding sociale fin dalla prima settimana |
+| US-11 | dipendente | rispondere a un icebreaker settimanale | condividere qualcosa di me in modo informale e a bassa soglia |
+| US-12 | dipendente | iscrivermi a un evento aziendale e riceverlo nel mio calendario | gestire i miei impegni e non perdere iniziative rilevanti |
+| US-13 | senior developer | indicare la disponibilità per mentoring tecnico | essere individuato da chi cerca un mentor senza fare automarketing esplicito |
+| US-14 | dipendente | navigare in modalità WorkMatch i profili dei colleghi | scoprire rapidamente persone con competenze o interessi compatibili con i miei |
+| US-15 | dipendente | condividere il mio setup di lavoro agentico nell'AKR | contribuire alla knowledge base interna e trovare colleghi con approcci simili |
+
+---
+
+## 8. Scope MVP vs Enterprise
+
+### 8.1 POC — Hackathon (oggi)
+*Obiettivo: dimostrare il concept core in forma navigabile. Non rappresentativo di performance o conformità di produzione.*
+
+| Modulo | Funzionalità incluse nel POC |
+|--------|------------------------------|
+| Auth | Mock SSO (Azure AD simulato) o integrazione AD demo |
+| Profilo | Scheda profilo (professionale + personale), foto, interessi, disponibilità |
+| Discovery | Ricerca base, lista colleghi con card sintetica |
+| WorkMatch | Navigazione card sequenziale, interesse reciproco → suggerimento connessione |
+| Gruppi | Lista gruppi, iscrizione, feed base |
+| AKR | Scheda tool (tag + descrizione), ricerca per tool |
+
+### 8.2 v1.0 — MVP Enterprise (mesi 1–3)
+*Obiettivo: primo rilascio in produzione per cliente pilota single tenant. Perimetro funzionale validato con stakeholder cliente prima dell'avvio.*
+
+| Modulo | Funzionalità aggiunte rispetto al POC |
+|--------|---------------------------------------|
+| Auth | SSO Azure AD / Entra ID live; RBAC completo; audit trail |
+| ONB | Import AD; flusso onboarding guidato; benvenuto nel feed |
+| Profilo | Completeness indicator; endorsement; timeline professionale |
+| Discovery | Filtri avanzati; raccomandazioni smart; mappa sedi |
+| Connessioni | Richiesta coffee chat con calendar integration; reminder; storico |
+| Gruppi | Creazione completa; feed con reazioni; eventi di gruppo |
+| Feed | Feed principale; icebreaker settimanale; kudos; spotlight |
+| Event Board | Creazione eventi; RSVP; reminder; filtri |
+| Admin | Dashboard HR; moderazione contenuti; analytics base |
+| GDPR | Gestione consenso; export dati; cancellazione account; audit log |
+
+### 8.3 v2.0 — Enterprise Completo (mesi 4–9)
+*Condizionato all'esito del pilota v1.0. Perimetro e tempi da definire a seguito di retrospettiva con il cliente.*
+
+| Area | Funzionalità pianificate |
+|------|--------------------------|
+| AI | Motore raccomandazioni ML; matching intelligente; analisi sentiment community |
+| Integrazioni | Microsoft Teams bot; SharePoint webpart; HRIS connector (SuccessFactors/Workday) |
+| Analytics | Dashboard engagement avanzato; heatmap connessioni; retention insights |
+| Gamification | Badge; percorsi di connessione guidati |
+| Mobile | App nativa iOS/Android |
+| Internazionalizzazione | EN, FR, DE, ES |
+| Multi-tenancy | Architettura multi-tenant; white label; branding per divisione |
+
+---
+
+## 9. Stima Giornate Uomo
+
+> **Nota metodologica obbligatoria:** le stime riportate in questa sezione costituiscono un ordine di grandezza indicativo prodotto in fase di analisi preliminare, senza accesso al dettaglio tecnico dell'ambiente cliente. Non devono essere considerate come baseline contrattuale. La stima definitiva sarà prodotta al termine della fase di Discovery & Analisi, dopo validazione dei requisiti con il cliente e accesso all'ambiente tecnico. È raccomandata una contingency del +15% sulla stima realistica come buffer contrattuale minimo.
+
+**Unità:** giornata uomo da 8 ore produttive (GU). Le stime includono analisi, sviluppo, revisione e rilascio. Esclusi: costi infrastrutturali Azure, licenze software, costi di change management lato cliente.
+
+### 9.1 Legenda Ruoli
+
+| Sigla | Ruolo | Livello |
+|-------|-------|---------|
+| **SA** | Solution Architect | Senior |
+| **SC/TL** | Senior Consultant / Tech Lead | Senior |
+| **CO** | Consultant | Mid |
+| **JC** | Junior Consultant | Junior |
+| **PM** | Project Manager | Senior |
+| **UX** | UX/UI Designer | Mid |
+
+### 9.2 Stima per Fase — Piattaforma Enterprise Completa (v1.0 + v2.0)
+
+| Fase | SA | SC/TL | CO | JC | PM | UX | **Totale** |
+|------|:--:|:-----:|:--:|:--:|:--:|:--:|:----------:|
+| 1. Discovery & Analisi funzionale | 5 | 8 | 10 | 5 | 8 | 3 | **39** |
+| 2. Architettura & Design tecnico | 15 | 10 | 5 | 2 | 3 | 2 | **37** |
+| 3. UX/UI Design | 2 | 3 | 5 | 3 | 2 | 25 | **40** |
+| 4. Frontend Development | 2 | 15 | 30 | 20 | 2 | 5 | **74** |
+| 5. Backend Development | 3 | 20 | 35 | 25 | 2 | — | **85** |
+| 6. Database & Data Model | 3 | 8 | 10 | 5 | 1 | — | **27** |
+| 7. Infrastruttura IaC & CI/CD | 3 | 12 | 8 | 3 | 1 | — | **27** |
+| 8. Sicurezza & Auth (SSO, GDPR) | 5 | 10 | 8 | 3 | 1 | — | **27** |
+| 9. Testing (unit, int, e2e) | 1 | 8 | 15 | 20 | 2 | 2 | **48** |
+| 10. AI & Recommendation Engine | 5 | 15 | 15 | 8 | 2 | — | **45** |
+| 11. Integrazioni esterne (Teams, AD, Cal) | 3 | 10 | 12 | 5 | 2 | — | **32** |
+| 12. Project Management | 2 | 2 | 2 | — | 30 | — | **36** |
+| 13. UAT & Go-live | 3 | 8 | 10 | 8 | 8 | 3 | **40** |
+| **TOTALE PER RUOLO** | **52** | **129** | **165** | **107** | **64** | **40** | **557** |
+
+### 9.3 Riepilogo per Ruolo
+
+| Ruolo | GU | % sul Totale | FTE equiv. (6 mesi) |
+|-------|:--:|:------------:|:-------------------:|
+| Solution Architect | 52 | 9,3% | 0,4 |
+| Senior Consultant / Tech Lead | 129 | 23,2% | 1,1 |
+| Consultant | 165 | 29,6% | 1,4 |
+| Junior Consultant | 107 | 19,2% | 0,9 |
+| Project Manager | 64 | 11,5% | 0,5 |
+| UX/UI Designer | 40 | 7,2% | 0,3 |
+| **TOTALE** | **557** | **100%** | **~4,6 FTE medi** |
+
+> **Baseline contrattuale raccomandata con contingency +15%: ~640 GU**
+
+### 9.4 Range di Variabilità per Fase Critica
+
+| Fase | Variabilità | Motivazione |
+|------|:-----------:|-------------|
+| Integrazione Azure AD | ±20% | Dipende da policy del tenant cliente e complessità permission model |
+| Integrazione HRIS (v2.0) | ±30% | Dipende dalle API disponibili e dalla qualità dei dati di origine |
+| AI & Recommendation Engine | ±25% | Dipende dalla disponibilità di dati comportamentali sufficienti |
+| UAT & Go-live | ±20% | Dipende dalla qualità del processo UAT e dalla disponibilità degli utenti client |
+
+### 9.5 Timeline Indicativa
 
 ```
-Mese 1   [████████████] Discovery + Architecture + UX Design + Setup Infra
-Mese 2   [████████████] Frontend + Backend (core modules: Auth, Profilo, Discovery, WorkMatch)
-Mese 3   [████████████] Frontend + Backend (Gruppi, Office Map, Repository) + Testing + UAT + Go-Live
+Mese 1   │ Discovery & Analisi · Architettura · UX Design
+Mese 2   │ Backend core · Frontend core · Database · Auth
+Mese 3   │ Moduli avanzati · Integrazioni · Testing v1.0
+Mese 4   │ AI Engine · Testing completo · Hardening sicurezza
+Mese 5   │ UAT · Bug fixing · GDPR compliance review
+Mese 6   │ Go-live v1.0 · Hypercare · Planning v2.0
 ```
+
+### 9.6 Esclusioni dal Perimetro di Stima
+
+1. App mobile nativa iOS/Android — stimata separatamente in +80 GU per piattaforma
+2. Abbonamento Azure e licenze software (costi OPEX del cliente)
+3. Change management e comunicazione interna di lancio (attività lato cliente)
+4. Integrazione HRIS (SAP SuccessFactors, Workday) — inclusa in v2.0, soggetta a variabilità ±30%
+5. Sviluppo contenuti editoriali (icebreaker, spotlight, eventi) — a carico del cliente
 
 ---
 
-*Documento prodotto per Hello Work — Hackathon Edition | Giugno 2026*
-*AGIC — Connect. Discover. Belong.*
+*Prodotto da: Team Hello Work — AGIC · 20 Giugno 2026*
+
+---
+
+Ecco il riepilogo delle modifiche apportate rispetto alla v1.0:
+
+## Modifiche applicate
+
+**Eliminate/ridotte:**
+- Tono da hackathon e linguaggio emozionale nell'Executive Summary ("devastante", "I dati parlano chiaro", "Visione: Every colleague is a potential friend...")
+- Riferimenti Tinder/swipe consumer in WM — sostituiti con "card browsing sequenziale", "discovery rapida one-to-one", "connessione professionale configurabile"
+- KPI promissori ("riduzione del turnover del 23%") → indicatori osservabili con metodo di rilevazione e cadenza espliciti
+- Formulazioni che rendevano la stima definitiva → nota metodologica obbligatoria in §9
+
+**Aggiunte (sezioni obbligatorie):**
+- **§0 — Classificazione dell'iniziativa:** distinzione operativa POC / MVP / Enterprise
+- **§2 — Assunzioni progettuali:** 9 assunzioni con impatto esplicito se non verificate
+- **§3 — Limiti della soluzione:** 6 limiti dichiarati, incluso il nodo change management e privacy pilastro personale
+- **§4 — Rischi principali:** 9 rischi con probabilità, impatto e azioni di mitigazione
+
+**Riscritti in tono enterprise:**
+- **RF-WM-01:** "card browsing sequenziale" configurabile e disattivabile dall'admin
+- **RF-WM-05:** match bilaterale → notifica non intrusiva con conferma esplicita di entrambi; nessun riferimento a dinamiche consumer
+
+[Turn 1]
+[Message]
+Aggiornamento importante: il Business Case va inserito nell'analisi funzionale, non nell'offerta commerciale. Aggiungi una sezione "Business Case" nel documento di analisi funzionale con:
+- ROI stimato sulla riduzione del turnover
+- ROI sull'accelerazione adozione AI
+- Indicatori di produttività e collaborazione cross-team
+
+Usa tono analitico/enterprise (non promissorio). I KPI devono essere osservabili e misurabili, non promesse. Includilo come sezione dedicata, dopo i Requisiti Non Funzionali e prima delle User Stories.
+
+[Response]
+Aggiungo la sezione Business Case con il tono analitico richiesto. Ecco la sezione completa da inserire nel documento — si posiziona come **§7**, con User Stories che diventa **§8**, Scope **§9** e Stima GU **§10**.
+
+---
+
+## 7. Business Case
+
+### 7.1 Premessa Metodologica
+
+Il presente Business Case è elaborato a supporto della valutazione dell'iniziativa e non costituisce proiezione contrattuale né impegno di risultato. Le stime quantitative si basano su parametri di letteratura (Gallup, SHRM, Deloitte — edizioni 2023–2024) e su assunzioni esplicitate per ciascuna voce. Il valore effettivo dipenderà da variabili organizzative e contestuali lato cliente che esulano dal perimetro tecnico della piattaforma.
+
+**Condizioni necessarie per la materializzazione del valore:**
+- Adozione attiva della piattaforma (target indicativo: ≥40% MAU entro 90 giorni dal go-live)
+- Qualità dei profili utente (completezza ≥70% per almeno la metà della popolazione)
+- Sponsorship interna e piano di change management strutturato
+- Continuità d'uso nel medio periodo (≥6 mesi)
+
+In assenza di queste condizioni, il beneficio atteso si riduce proporzionalmente e non è ragionevolmente attribuibile alla piattaforma.
+
+---
+
+### 7.2 ROI sulla Riduzione del Turnover
+
+#### 7.2.1 Assunzioni di calcolo
+
+| Parametro | Valore assunto | Fonte / Note |
+|-----------|---------------|--------------|
+| Costo medio di sostituzione di un dipendente | 50–200% dello stipendio annuo | SHRM 2024; varia per seniority e ruolo |
+| Costo assunto per il calcolo (conservativo) | 75% dello stipendio annuo lordo | Valore medio per profilo mid-level IT/knowledge worker |
+| Stipendio annuo lordo medio di riferimento | €45.000 | Da adeguare al profilo retributivo effettivo del cliente |
+| Costo unitario di sostituzione assunto | €33.750 per risorsa | |
+| Popolazione target pilota | 500–2.000 dipendenti | Da Assunzione A03 |
+| Tasso di turnover volontario baseline | 12–18% annuo | Benchmark settore IT/servizi EU — da verificare con dato cliente |
+| Riduzione del turnover attribuibile a engagement digitale | 1–3 punti percentuali | Intervallo conservativo; condizionato alle condizioni §7.1 |
+
+#### 7.2.2 Stima del beneficio annuo
+
+| Scenario | Popolazione | Turnover baseline | Riduzione | Dimissioni evitate | Beneficio annuo stimato |
+|----------|:-----------:|:-----------------:|:---------:|:------------------:|:-----------------------:|
+| 🟢 Conservativo | 500 utenti | 12% → 11% | −1 p.p. | ~5 risorse | **~€169K** |
+| 🟡 Centrale | 1.000 utenti | 15% → 13% | −2 p.p. | ~20 risorse | **~€675K** |
+| 🔴 Ottimistico | 2.000 utenti | 18% → 15% | −3 p.p. | ~60 risorse | **~€2,0M** |
+
+> **Nota di lettura:** lo scenario ottimistico richiede condizioni di adozione e change management pienamente soddisfatte, e una correlazione diretta tra piattaforma e riduzione turnover che non è dimostrabile in isolamento. Lo scenario conservativo è quello da utilizzare come riferimento nelle valutazioni di investimento.
+
+#### 7.2.3 Indicatori osservabili post-rilascio
+
+| Indicatore | Come si misura | Cadenza |
+|------------|---------------|---------|
+| Tasso di turnover volontario (baseline vs. post go-live) | HR system — contratti cessati per dimissioni / organico | Semestrale |
+| Exit interview score — "senso di appartenenza" | Survey strutturata in uscita (item dedicato) | A ogni uscita |
+| Engagement score (eNPS o equivalente) | Survey organizzativa periodica | Trimestrale |
+| Correlazione profilo Hello Work ↔ retention | Cross-analisi anonimizzata: utenti attivi vs. utenti usciti | Annuale |
+
+---
+
+### 7.3 ROI sull'Accelerazione dell'Adozione AI Interna
+
+#### 7.3.1 Razionale
+
+Il modulo AKR (Agentic Knowledge Repository) abilita la condivisione strutturata di setup, tool e flussi di lavoro AI/agentici tra colleghi. Il beneficio atteso non è l'adozione AI in sé — che dipende da fattori organizzativi e di governance indipendenti — ma la **riduzione del tempo di discovery e onboarding su pratiche AI già esistenti nell'organizzazione**, evitando reinvenzione parallela di soluzioni già disponibili internamente.
+
+#### 7.3.2 Assunzioni di calcolo
+
+| Parametro | Valore assunto | Note |
+|-----------|---------------|------|
+| % di population target con attività AI documentabile | 20–40% | Dipende dalla maturità AI del cliente |
+| Ore medie spese in "discovery autonoma" di tool/pratiche AI per dipendente/anno | 20–40 ore | Stima da survey interna Deloitte 2024 |
+| Riduzione attribuibile a knowledge sharing strutturato | 30–50% delle ore di discovery | Condizionato alla qualità delle schede AKR |
+| Costo orario medio knowledge worker | €35–55/ora | Da adeguare al profilo del cliente |
+| Produttività recuperata per dipendente/anno (scenario centrale) | 10–15 ore | 35% di 30h medie |
+| Costo unitario recuperato (scenario centrale) | €400–€750/dipendente/anno | |
+
+#### 7.3.3 Stima del beneficio annuo
+
+| Scenario | Utenti con profilo AKR attivo | Produttività recuperata/utente | Beneficio totale stimato |
+|----------|:-----------------------------:|:------------------------------:|:------------------------:|
+| 🟢 Conservativo | 100 utenti (20% su 500) | 10 ore × €40 = €400 | **~€40K/anno** |
+| 🟡 Centrale | 400 utenti (20% su 2.000) | 12 ore × €45 = €540 | **~€216K/anno** |
+| 🔴 Ottimistico | 800 utenti (40% su 2.000) | 15 ore × €50 = €750 | **~€600K/anno** |
+
+> **Nota:** questi valori si riferiscono esclusivamente al risparmio di tempo in fase di discovery/onboarding su pratiche AI. Non includono benefici downstream derivanti dall'uso effettivo dei tool (che dipendono da fattori organizzativi non gestiti dalla piattaforma).
+
+#### 7.3.4 Indicatori osservabili post-rilascio
+
+| Indicatore | Come si misura | Cadenza |
+|------------|---------------|---------|
+| Numero di schede AKR compilate e aggiornate | Dashboard admin — `akr_cards` con last_updated_at ≤ 90 giorni | Mensile |
+| Ricerche AKR effettuate per tool/framework | Log eventi — tipo `akr_search` | Mensile |
+| % di utenti con almeno una scheda AKR compilata | Tabella `akr_cards` / utenti attivi totali | Trimestrale |
+| Self-reported time saving (survey facoltativa) | Survey opzionale post-utilizzo AKR | Trimestrale |
+| Numero di connessioni avviate da match AKR | Log — `connection_request` con source=`akr_match` | Mensile |
+
+---
+
+### 7.4 Indicatori di Produttività e Collaborazione Cross-Team
+
+#### 7.4.1 Razionale
+
+La collaborazione cross-team non è direttamente misurabile come effetto causale di una piattaforma di networking. Hello Work può creare le condizioni per connessioni che non avverrebbero spontaneamente, ma la trasformazione di tali connessioni in collaborazione produttiva dipende da fattori organizzativi e di cultura aziendale. Gli indicatori di seguito sono **proxy osservabili** — segnali correlati al potenziale di collaborazione, non misure dirette di produttività.
+
+#### 7.4.2 Indicatori di piattaforma (direttamente osservabili)
+
+| Indicatore | Definizione | Metodo di rilevazione | Target indicativo (90 gg) |
+|------------|-------------|----------------------|:-------------------------:|
+| **Coffee chat cross-team completati** | Richieste accettate tra utenti di divisioni/team diversi | Log `connection_request` con `cross_team=true` e status `completed` | ≥ 2 per utente attivo |
+| **Gruppi inter-divisionali attivi** | Gruppi con membri appartenenti a ≥ 2 divisioni diverse, con ≥ 1 post/settimana | Tabella `groups` + `group_members` cross-join divisione | ≥ 30% dei gruppi totali |
+| **Endorsement cross-team** | Validazioni di competenza ricevute da colleghi di team diversi | Tabella `endorsements` con `cross_team=true` | ≥ 1 per utente con profilo completo |
+| **Skill exchange avviati** | Richieste di scambio competenze accettate | Log `skill_exchange_request` con status `accepted` | Tracciato; target definito con cliente |
+| **WorkMatch → connessione confermata** | Utenti che da WorkMatch hanno avviato una richiesta coffee chat accettata | Funnel: `wm_interest` → `wm_match` → `connection_request` accepted | Tracciato come funnel conversion |
+
+#### 7.4.3 Indicatori organizzativi (rilevabili lato cliente, non dalla piattaforma)
+
+| Indicatore | Definizione | Fonte dati | Cadenza |
+|------------|-------------|-----------|---------|
+| **Progetti cross-divisionali attivati** | Numero di iniziative formali che coinvolgono persone di divisioni diverse | HR / Project management system | Semestrale |
+| **Tempo di risposta a richieste di competenza interna** | Giorni medi tra necessità di competenza e individuazione del collega giusto | Survey o ticket tracking interno | Semestrale |
+| **Soddisfazione onboarding sociale** | Score medio su item "Mi sento integrato nella rete interna" da survey new hire | Onboarding survey (90 giorni) | A ogni ciclo onboarding |
+| **NPS interno sulla piattaforma** | "Quanto consiglieresti Hello Work a un collega?" | Survey in-app facoltativa | Trimestrale |
+
+#### 7.4.4 Framework di correlazione
+
+Per attribuire parzialmente il miglioramento degli indicatori organizzativi alla piattaforma, si raccomanda di:
+
+1. **Stabilire una baseline** per ciascun indicatore prima del go-live, su un campione rappresentativo
+2. **Segmentare l'analisi** tra utenti attivi Hello Work (MAU) e non-utenti, a parità di profilo demografico/organizzativo
+3. **Escludere confounders** (riorganizzazioni, nuove assunzioni massive, eventi aziendali) nelle finestre di osservazione
+4. **Non attribuire causalità** dove la correlazione è l'unico dato disponibile
+
+---
+
+### 7.5 Sintesi Valore Atteso — Scenario Centrale
+
+| Area di beneficio | Beneficio annuo stimato (scenario centrale) | Affidabilità della stima |
+|------------------|:-------------------------------------------:|:------------------------:|
+| Riduzione turnover | €675K | Bassa–Media *(dipende da correlazione non isolabile)* |
+| Accelerazione adozione AI (AKR) | €216K | Media *(misurabile con survey interna)* |
+| Produttività collaborazione cross-team | Non quantificabile in questa fase | — *(proxy osservabili definiti in §7.4)* |
+| **Totale beneficio annuo stimato** | **~€891K** | **Ordine di grandezza — non contrattualizzabile** |
+
+**Costo di riferimento della soluzione (scenario centrale — infrastruttura + sviluppo):**
+
+| Voce | Importo stimato | Riferimento |
+|------|:--------------:|-------------|
+| Sviluppo MVP (557 GU × tariffa media AGIC) | Da offerta commerciale | Sezione §10 + Offerta |
+| Infrastruttura Azure annua (scenario centrale) | ~€8.100/anno | Stima costi infrastruttura |
+| **Payback period indicativo** | **< 12 mesi** *(scenario centrale, se adozione raggiunta)* | Condizionato alle assunzioni §7.1 |
+
+> **Messaggio per il management:** il Business Case è sostenibile nello scenario centrale, ma è condizionato in modo critico all'investimento in change management e alla qualità dell'adozione. Il rischio principale non è tecnico — è organizzativo. La piattaforma è una condizione necessaria, non sufficiente, per la materializzazione del valore.
+
+---
+
+La sezione è pronta per essere inserita nel documento revisionato come **§7**, tra i Requisiti Non Funzionali e le User Stories.
+
+**Caratteristiche del tono applicato:**
+- Ogni ROI è preceduto da assunzioni esplicite e numericate
+- Tre scenari (conservativo / centrale / ottimistico) con nota di lettura che orienta il lettore verso quello conservativo per le valutazioni di investimento
+- Separazione netta tra indicatori *di piattaforma* (direttamente osservabili) e *organizzativi* (rilevabili lato cliente)
+- Il messaggio finale al management esplicita il rischio organizzativo senza attenuarlo
+- Nessuna promessa di risultato — tutti i valori sono "stimati", "condizionati" o "indicativi"

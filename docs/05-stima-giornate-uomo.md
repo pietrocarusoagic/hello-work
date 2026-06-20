@@ -1,24 +1,61 @@
 # Hello Work — Stima Giornate Uomo
-
-> Documento 5 di 6 | Output richiesto mattina | Hackathon AGIC 2026
-
----
-
-## 7. Stima Giornate Uomo
-
-### Parametri di stima
-- **Giornata lavorativa**: 8 ore
-- **Approccio**: Agile, sprint da 2 settimane
-- **Stack assunto**: React (frontend), Python FastAPI (backend), PostgreSQL + Azure infra
-- **Scope**: v1.0 completa (superset del POC, baseline commerciale)
+**v1.1** · 20 Giugno 2026
 
 ---
 
-### Breakdown per Fase e Ruolo
+> ⚠️ **Nota obbligatoria — Natura della stima**
+> I valori riportati sono **stime indicative di ordine di grandezza**, prodotte sulla base delle assunzioni descritte nella sezione seguente. Non costituiscono impegno contrattuale, preventivo definitivo né garanzia di costo finale. La stima definitiva dovrà essere prodotta al termine della fase di Discovery, sulla base del perimetro funzionale confermato e delle scelte architetturali validate.
 
-| Fase | Attività | Solution Architect | Senior Consultant | Consultant | Junior | PM |
+---
+
+## 1. Assunzioni alla Base della Stima
+
+| Assunzione | Valore assunto |
+|---|---|
+| **Scope di riferimento** | v1.0 completa — superset del POC, baseline commerciale |
+| **Approccio di delivery** | Agile / Scrum — sprint da 2 settimane, rilasci progressivi |
+| **Giornata lavorativa** | 8 ore effettive |
+| **Stack di riferimento** | Da validare in fase di design architetturale (vedi Arch. Enterprise). Ipotesi di lavoro: React/Next.js frontend, backend API su ecosistema Microsoft, PostgreSQL su Azure |
+| **Tenant** | Single tenant — architettura multi-tenant non inclusa in questa stima |
+| **Integrazioni** | Solo Azure AD SSO. Nessuna integrazione HRIS, calendario o sistemi esterni |
+| **Ambienti** | Development + Staging + Production |
+| **Disponibilità cliente** | Stakeholder disponibili per workshop, UAT e sign-off sprint |
+| **Buffer incluso** | 15% già incorporato nei totali per risk management e imprevisti |
+
+---
+
+## 2. Rischi di Variazione della Stima
+
+| Fattore di rischio | Impatto stimato | Mitigazione |
+|---|---|---|
+| Perimetro non consolidato | ±20–30% | Assessment funzionale in Fase 1 |
+| Scelte architetturali non validate | ±15–25% | Architecture design sprint dedicato |
+| Integrazioni aggiuntive (HRIS, Teams, calendar) | +20–40 gg/u per integrazione | Perimetrare esplicitamente in contratto |
+| Qualità dati Azure AD incompleti | +5–10 gg/u | Verifica tenant AD in kick-off |
+| Change request durante la delivery | Gestito tramite Change Request formale | Governance sprint-by-sprint |
+| Profili complessi di sicurezza / compliance | +10–20 gg/u | Security assessment preventivo |
+
+---
+
+## 3. Tariffe di Riferimento
+
+Le tariffe utilizzate sono coerenti con il documento Offerta Commerciale (doc 06).
+
+| Ruolo | Tariffa giornaliera |
+|---|---|
+| Solution Architect | €900/gg |
+| Senior Consultant | €700/gg |
+| Consultant | €450/gg |
+| Junior Consultant | €300/gg |
+| Project Manager | €575/gg |
+
+---
+
+## 4. Breakdown per Fase e Ruolo
+
+| Fase | Attività | Sol. Arch | Senior | Consultant | Junior | PM |
 |---|---|:---:|:---:|:---:|:---:|:---:|
-| **1. Discovery & Analysis** | Workshops stakeholder, analisi requisiti, definizione scope | 2 | 2 | 1 | 0 | 3 |
+| **1. Discovery & Analysis** | Workshop stakeholder, analisi requisiti, definizione scope | 2 | 2 | 1 | 0 | 3 |
 | | Definizione tassonomia tag (skill, AI tools, hobby) | 0 | 2 | 2 | 0 | 1 |
 | | Data model review Azure AD, GDPR assessment | 1 | 2 | 1 | 0 | 1 |
 | | **Subtotale Fase 1** | **3** | **6** | **4** | **0** | **5** |
@@ -27,22 +64,22 @@
 | | API design (OpenAPI spec, contratti) | 2 | 3 | 2 | 0 | 0 |
 | | Security architecture (Azure AD OIDC, RBAC, GDPR) | 3 | 2 | 1 | 0 | 0 |
 | | **Subtotale Fase 2** | **12** | **10** | **4** | **0** | **1** |
-| **3. UX / UI Design** | User flows, wireframe, prototipo Figma | 1 | 2 | 0 | 0 | 1 |
+| **3. UX / UI Design** | User flows, wireframe, prototipo navigabile | 1 | 2 | 0 | 0 | 1 |
 | | UI design system + componenti | 0 | 3 | 3 | 1 | 0 |
-| | Revisione accessibilità WCAG | 0 | 2 | 1 | 0 | 0 |
+| | Revisione accessibilità WCAG 2.1 AA | 0 | 2 | 1 | 0 | 0 |
 | | **Subtotale Fase 3** | **1** | **7** | **4** | **1** | **1** |
-| **4. Frontend Development** | Setup progetto React, routing, auth MSAL | 0 | 2 | 3 | 2 | 0 |
+| **4. Frontend Development** | Setup progetto, routing, auth MSAL | 0 | 2 | 3 | 2 | 0 |
 | | Onboarding wizard (3 step) | 0 | 1 | 3 | 3 | 0 |
 | | Gestione profilo (3 pilastri + completeness) | 0 | 2 | 4 | 4 | 0 |
 | | Discovery Home + feed | 0 | 2 | 3 | 3 | 0 |
-| | WorkMatch swipe UI | 0 | 1 | 3 | 4 | 0 |
+| | Discovery rapido one-to-one (WorkMatch) | 0 | 1 | 3 | 4 | 0 |
 | | Gruppi (lista, catalogo, bacheca) | 0 | 1 | 3 | 4 | 0 |
 | | Office Map (mappa interattiva + filtri) | 0 | 2 | 4 | 3 | 0 |
 | | Agentic Repository (listing + ricerca + detail) | 0 | 1 | 3 | 3 | 0 |
 | | Ricerca globale + filtri | 0 | 1 | 2 | 2 | 0 |
 | | Admin panel base | 0 | 1 | 2 | 2 | 0 |
 | | **Subtotale Fase 4** | **0** | **14** | **30** | **30** | **0** |
-| **5. Backend Development** | Setup FastAPI, modelli dati, migrazioni DB | 0 | 2 | 3 | 2 | 0 |
+| **5. Backend Development** | Setup API, modelli dati, migrazioni DB | 0 | 2 | 3 | 2 | 0 |
 | | Azure AD SSO integration (OIDC, token validation) | 1 | 3 | 2 | 1 | 0 |
 | | API Profilo CRUD (3 pilastri, sync AD) | 0 | 2 | 4 | 3 | 0 |
 | | Algoritmo matching deterministico | 1 | 3 | 3 | 1 | 0 |
@@ -53,7 +90,7 @@
 | | API Repository (CRUD, ricerca full-text) | 0 | 2 | 3 | 2 | 0 |
 | | GDPR: export dati, cancellazione profilo | 0 | 2 | 2 | 1 | 0 |
 | | **Subtotale Fase 5** | **2** | **21** | **29** | **19** | **0** |
-| **6. Infrastruttura & DevOps** | Azure provisioning (App Service, PostgreSQL, Key Vault) | 2 | 3 | 2 | 1 | 0 |
+| **6. Infrastruttura & DevOps** | Azure provisioning (Container Apps, PostgreSQL, Key Vault) | 2 | 3 | 2 | 1 | 0 |
 | | CI/CD pipeline (GitHub Actions) | 1 | 2 | 2 | 1 | 0 |
 | | Configurazione ambienti (dev, staging, prod) | 1 | 1 | 2 | 1 | 0 |
 | | Monitoring base (Application Insights) | 1 | 1 | 1 | 0 | 0 |
@@ -61,7 +98,7 @@
 | **7. Testing & QA** | Test plan, definizione casi di test | 0 | 2 | 2 | 1 | 1 |
 | | Unit test backend (copertura ≥ 80%) | 0 | 2 | 3 | 3 | 0 |
 | | Integration test (API + DB) | 0 | 1 | 3 | 2 | 0 |
-| | E2E test (Playwright/Cypress — flussi critici) | 0 | 1 | 2 | 3 | 0 |
+| | E2E test (flussi critici) | 0 | 1 | 2 | 3 | 0 |
 | | Security testing (OWASP top 10 base) | 1 | 2 | 1 | 0 | 0 |
 | | **Subtotale Fase 7** | **1** | **8** | **11** | **9** | **1** |
 | **8. UAT & Go-Live** | UAT con utenti pilota (facilitazione) | 0 | 1 | 2 | 1 | 3 |
@@ -75,36 +112,60 @@
 
 ---
 
-### Riepilogo per Ruolo
+## 5. Riepilogo per Ruolo
 
-| Ruolo | Giorni Uomo | Tariffa indicativa (€/gg) | Costo stimato |
+| Ruolo | Giorni Uomo | Tariffa (€/gg) | Costo indicativo |
 |---|:---:|:---:|:---:|
-| Solution Architect | **25** | 800 | € 20.000 |
-| Senior Consultant | **78** | 650 | € 50.700 |
-| Consultant | **98** | 500 | € 49.000 |
-| Junior Consultant | **69** | 350 | € 24.150 |
-| Project Manager | **29** | 600 | € 17.400 |
-| **TOTALE** | **299** | — | **€ 161.250** |
+| Solution Architect | **25** | €900 | **€ 22.500** |
+| Senior Consultant | **78** | €700 | **€ 54.600** |
+| Consultant | **98** | €450 | **€ 44.100** |
+| Junior Consultant | **69** | €300 | **€ 20.700** |
+| Project Manager | **29** | €575 | **€ 16.675** |
+| **TOTALE** | **299 gg/u** | — | **€ 158.575** |
 
-> ⚠️ **Note di stima**
-> - La stima si riferisce a **v1.0 completa** (3 mesi, scope pieno)
-> - Il **POC Hackathon** è stimato in ~**40-50 gg/u** (fasi 2, 4, 5, 6 ridotte al minimo)
-> - Le tariffe sono indicative e non includono IVA né licenze software
-> - La stima include un buffer del 15% per risk management e imprevisti (già incorporato)
-> - Eventuali licenze Azure, tool di design o SaaS sono escluse e da quotare separatamente
-> - Per la versione **Enterprise** (12 mesi, multi-tenant, ML, mobile PWA), la stima è da moltiplicare per un fattore 2.5-3x
+> Le tariffe sono coerenti con il documento Offerta Commerciale (doc 06). I valori sono indicativi e non includono IVA, licenze software o costi infrastrutturali Azure (stimati separatamente in doc 04).
 
 ---
 
-### Cronoprogramma Macro
+## 6. Riferimento alle Fasi di Progetto
 
-```
-Mese 1   [████████████] Discovery + Architecture + UX Design + Setup Infra
-Mese 2   [████████████] Frontend + Backend (core modules: Auth, Profilo, Discovery, WorkMatch)
-Mese 3   [████████████] Frontend + Backend (Gruppi, Office Map, Repository) + Testing + UAT + Go-Live
-```
+La stima è articolata su tre livelli distinti con effort molto diversi:
+
+| Fase | Descrizione | Effort stimato | Orizzonte |
+|---|---|:---:|---|
+| **Prototipo navigabile** | Interfaccia dimostrativa con dati simulati, flussi chiave navigabili, nessuna integrazione reale | **< 1 gg/u** | Ore / 1 giorno |
+| **POC validabile** | Architettura reale, autenticazione funzionante, dati persistiti su DB, deploy su cloud | **15–25 gg/u** | 4–6 settimane |
+| **v1.0 completa** | Tutti i moduli, testing, DevOps, sicurezza, documentazione, UAT | **299 gg/u** | 3 mesi |
+
+> Il breakdown nelle sezioni precedenti si riferisce alla **v1.0 completa**. Il POC e il prototipo hanno scope e costi radicalmente inferiori e devono essere stimati separatamente in funzione del perimetro concordato.
 
 ---
 
-*Documento prodotto per Hello Work — Hackathon Edition | Giugno 2026*
-*AGIC — Connect. Discover. Belong.*
+## 7. Perimetro della Stima e Cosa Non Include
+
+**Incluso:**
+- Tutte le attività di analisi, progettazione, sviluppo, testing e go-live della v1.0
+- Project management e cerimonie Agile
+- Documentazione tecnica e utente
+- Security testing base (OWASP top 10)
+- 15% buffer per imprevisti
+
+**Non incluso:**
+- Costi infrastrutturali Azure (→ doc 04)
+- Licenze software di terze parti
+- Integrazioni non esplicitamente perimetrate (HRIS, Teams, calendar)
+- Change management e comunicazione interna (stimabile separatamente)
+- Versione Enterprise / multi-tenant (stima separata: fattore 2.5–3x)
+- Supporto e manutenzione post go-live
+
+---
+
+## 7. Cronoprogramma Macro
+
+```
+Mese 1  [████████████] Discovery + Architecture + UX Design + Setup Infra
+Mese 2  [████████████] Frontend + Backend (Auth, Profilo, Discovery, WorkMatch)
+Mese 3  [████████████] Frontend + Backend (Gruppi, Map, Repository) + Testing + UAT + Go-Live
+```
+
+*I checkpoint decisionali al termine di ogni sprint garantiscono la possibilità di rivalutare priorità e scope in modo governato.*
