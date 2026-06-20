@@ -13,6 +13,7 @@ terraform {
 resource "azurerm_maps_account" "this" {
   name                = var.name
   resource_group_name = var.resource_group_name
+  location            = var.location
   sku_name            = "G2"
 
   tags = var.tags
