@@ -16,7 +16,7 @@
 │                                                                              │
 │   ┌─────────────┐   ┌──────────────┐   ┌───────────────────┐                │
 │   │  Web App    │   │  Mobile PWA  │   │  Teams Tab /      │                │
-│   │  Next.js 14 │   │  (SW + WASM) │   │  Viva Connections │                │
+│   │  React 19 + TypeScript (Vite 6) │   │  (SW + WASM) │   │  Viva Connections │                │
 │   └──────┬──────┘   └──────┬───────┘   └─────────┬─────────┘                │
 └──────────┼─────────────────┼─────────────────────┼──────────────────────────┘
            │ HTTPS           │                      │
@@ -55,8 +55,8 @@
 │                                                                              │
 │   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
 │   │ Profile API  │  │ Matching     │  │ WorkMatch    │  │ Groups API   │   │
-│   │ (FastAPI)    │  │ Engine       │  │ Service      │  │ (FastAPI)    │   │
-│   │              │  │ (FastAPI +   │  │ (FastAPI)    │  │              │   │
+│   │ (ASP.NET Core 10 C#)    │  │ Engine       │  │ Service      │  │ (ASP.NET Core 10 C#)    │   │
+│   │              │  │ (FastAPI +   │  │ (ASP.NET Core 10 C#)    │  │              │   │
 │   │ CRUD 3-pillar│  │  Azure AI)   │  │ Swipe FSM   │  │ CRUD + recs  │   │
 │   └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘   │
 │          │                 │                  │                  │           │
@@ -76,7 +76,7 @@
 │  LAYER 4 — DATA TIER                                                          │
 │                                                                              │
 │   ┌─────────────────────┐   ┌─────────────────────┐   ┌──────────────────┐  │
-│   │  Azure PostgreSQL   │   │   Azure Cache for   │   │  Azure AI Search │  │
+│   │  Azure Azure SQL   │   │   Azure Cache for   │   │  Azure AI Search │  │
 │   │  Flexible Server HA │   │   Redis (P1)        │   │  (Cognitive      │  │
 │   │                     │   │                     │   │   Search)        │  │
 │   │  Zone Redundant     │   │  Session cache      │   │  Full-text on    │  │
@@ -174,7 +174,7 @@
 
 | Servizio | Tier | Ruolo |
 |---|---|---|
-| **Azure Container Apps** | Dedicated (Workload Profiles) | Microservizi FastAPI, autoscaling KEDA, ingress managed |
+| **Azure Container Apps** | Dedicated (Workload Profiles) | Microservizi ASP.NET Core 10, autoscaling KEDA, ingress managed |
 | **Azure Container Registry** | Premium | Registry privato con geo-replication e vulnerability scanning |
 | **Azure Service Bus** | Premium | Messaging asincrono tra microservizi (eventi match/notification) |
 | **Azure Functions** | Flex Consumption | Background jobs: analytics aggregation, scheduled matching refresh |
@@ -183,7 +183,7 @@
 
 | Servizio | Tier | Ruolo |
 |---|---|---|
-| **Azure Database for PostgreSQL Flexible Server** | General Purpose D4s_v3, Zone Redundant HA | OLTP primario, PITR 35gg, CMK encryption |
+| **Azure SQL Database Flexible Server** | General Purpose D4s_v3, Zone Redundant HA | OLTP primario, PITR 35gg, CMK encryption |
 | **Azure Cache for Redis** | P1 (6GB) | Match score cache, sessioni, rate limiting |
 | **Azure AI Search** | Standard S2 | Full-text + semantic search su profili e Knowledge Repository |
 | **Azure Blob Storage** | ZRS Hot + Cool tiering | Avatar, assets statici, export dati |
@@ -265,7 +265,7 @@
 User A swipes RIGHT on User B
         │
         ▼
-  FastAPI WorkMatch Service
+  ASP.NET Core 10 WorkMatch Service
   INSERT swipe(A→B, 'like')
         │
         ▼
@@ -311,7 +311,7 @@ User A swipes RIGHT on User B
 │              └──────────────┬──────────────┘              │
 │                             │                              │
 │              ┌──────────────▼──────────────┐              │
-│              │   PostgreSQL Row-Level       │              │
+│              │   Azure SQL Row-Level       │              │
 │              │   Security (tenant_id)       │              │
 │              │   Schema isolation per       │              │
 │              │   enterprise cliente         │              │
@@ -319,7 +319,7 @@ User A swipes RIGHT on User B
 └────────────────────────────────────────────────────────────┘
 ```
 
-**Isolamento dati**: PostgreSQL Row-Level Security su `tenant_id` — un singolo cluster, zero data leakage tra tenant.
+**Isolamento dati**: Azure SQL Row-Level Security su `tenant_id` — un singolo cluster, zero data leakage tra tenant.
 
 ---
 
@@ -355,7 +355,7 @@ triggers:
 |---|---|
 | **Transport** | TLS 1.3 ovunque, HSTS, certificate pinning mobile |
 | **Auth** | MSAL + JWT validation, token rotation 1h, refresh token 24h |
-| **Data at rest** | CMK (Customer Managed Key) su PostgreSQL + Storage via Key Vault |
+| **Data at rest** | CMK (Customer Managed Key) su Azure SQL + Storage via Key Vault |
 | **Network** | Private Endpoints per DB/Redis/Storage — nessun ingresso pubblico al data tier |
 | **Secrets** | Zero secrets in codice — 100% Key Vault con Managed Identity |
 | **GDPR** | Right-to-erasure endpoint (`DELETE /me`), data residency EU, DPA contrattuale |
@@ -370,13 +370,13 @@ triggers:
 ```
 GitHub Mono-repo
 ├── apps/
-│   ├── frontend/        # Next.js
-│   └── backend/         # FastAPI (microservizi)
+│   ├── frontend/        # React 19 + TypeScript (Vite 6)
+│   └── backend/         # ASP.NET Core 10 C# (microservizi)
 └── infra/               # Bicep (IaC)
 
 PIPELINE: Pull Request
   ├── [frontend]   npm test + ESLint + type-check
-  ├── [backend]    pytest + ruff + mypy
+  ├── [backend]    dotnet build + dotnet test
   ├── [security]   CodeQL SAST + Trivy container scan
   └── [infra]      bicep lint + what-if preview
 
