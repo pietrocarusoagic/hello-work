@@ -36,7 +36,7 @@
 │            ▼           ▼               ▼                          │
 │  ┌─────────────┐ ┌──────────┐ ┌──────────────────┐               │
 │  │  Azure DB   │ │  Azure   │ │   Azure Blob      │               │
-│  │ PostgreSQL  │ │   AD /   │ │   Storage         │               │
+│  │ Azure SQL  │ │   AD /   │ │   Storage         │               │
 │  │ (Flexible   │ │  Entra   │ │  (avatars,        │               │
 │  │  Server)    │ │   ID     │ │   assets)         │               │
 │  └─────────────┘ └──────────┘ └──────────────────┘               │
@@ -56,7 +56,7 @@
 | Servizio | SKU / Tier | Ruolo |
 |---|---|---|
 | **Azure Container Apps** | Consumption plan | Host ASP.NET Core 10 backend — scale to zero, zero infra management |
-| **Azure Database for PostgreSQL Flexible Server** | Burstable B1ms | Datastore principale: profili, match, swipe, gruppi |
+| **Azure SQL Database** | General Purpose 2 vCore (serverless) | Datastore principale: profili, match, swipe, gruppi |
 | **Azure Active Directory / Entra ID** | Existing tenant | SSO aziendale, pre-population profilo da AAD claims |
 | **Azure Static Web Apps** | Free tier | Host React 19 SPA (build Vite 6) |
 | **Azure Blob Storage** | LRS Hot | Avatar upload, assets statici |
@@ -118,12 +118,12 @@ HelloWork.Api/
     └── JwtValidationMiddleware.cs  // MSAL JWT validation
 ```
 
-### Database — PostgreSQL Schema (core tables)
+### Database — Azure SQL Schema (core tables)
 
 ```sql
 -- Profilo unificato
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT NEWID(),
   aad_oid TEXT UNIQUE NOT NULL,          -- Azure AD Object ID
   display_name TEXT,
   email TEXT,
@@ -132,44 +132,44 @@ CREATE TABLE users (
   -- Pillar 1: Professional (pre-populated da AAD)
   role TEXT,
   department TEXT,
-  skills TEXT[],                         -- tag array
-  certifications TEXT[],
+  skills NVARCHAR(MAX),                         -- tag array
+  certifications NVARCHAR(MAX),
   -- Pillar 2: Agentic
-  ai_tools TEXT[],                       -- ['Claude','Copilot','n8n',…]
+  ai_tools NVARCHAR(MAX),                       -- ['Claude','Copilot','n8n',…]
   ai_description TEXT,
   -- Pillar 3: Human
-  hobbies TEXT[],
-  interests TEXT[],
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
+  hobbies NVARCHAR(MAX),
+  interests NVARCHAR(MAX),
+  created_at DATETIME2 DEFAULT GETUTCDATE(),
+  updated_at DATETIME2 DEFAULT GETUTCDATE()
 );
 
 -- WorkMatch swipe state
 CREATE TABLE workmatch_swipes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT NEWID(),
   swiper_id UUID REFERENCES users(id),
   target_id UUID REFERENCES users(id),
   direction TEXT CHECK (direction IN ('like','pass')),
-  created_at TIMESTAMPTZ DEFAULT now(),
+  created_at DATETIME2 DEFAULT GETUTCDATE(),
   UNIQUE(swiper_id, target_id)
 );
 
 -- Mutual match result
 CREATE TABLE matches (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT NEWID(),
   user_a UUID REFERENCES users(id),
   user_b UUID REFERENCES users(id),
   match_score FLOAT,                     -- tag overlap %
   status TEXT DEFAULT 'pending',         -- pending/coffee_scheduled/connected
-  created_at TIMESTAMPTZ DEFAULT now()
+  created_at DATETIME2 DEFAULT GETUTCDATE()
 );
 
 -- Gruppi
 CREATE TABLE groups (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT NEWID(),
   name TEXT,
   description TEXT,
-  tags TEXT[],                           -- used for suggestion engine
+  tags NVARCHAR(MAX),                           -- used for suggestion engine
   created_by UUID REFERENCES users(id),
   is_system_suggested BOOLEAN DEFAULT false,
   member_count INT DEFAULT 0
@@ -178,7 +178,7 @@ CREATE TABLE groups (
 CREATE TABLE group_members (
   group_id UUID REFERENCES groups(id),
   user_id UUID REFERENCES users(id),
-  joined_at TIMESTAMPTZ DEFAULT now(),
+  joined_at DATETIME2 DEFAULT GETUTCDATE(),
   PRIMARY KEY (group_id, user_id)
 );
 ```
@@ -266,7 +266,7 @@ Browser                 React SPA            Azure AD           ASP.NET Core
 | **Frontend framework** | React 19 + TypeScript + Vite 6 | SPA veloce, HMR istantaneo con Vite, ecosystem maturo |
 | **Auth flow** | MSAL.js + Azure AD (existing tenant) | SSO aziendale nativo, no custom auth da costruire |
 | **Matching algorithm** | Jaccard deterministic (C#) | Zero training data needed, esplicabile ai giudici |
-| **DB** | PostgreSQL Flexible Server + EF Core | Array columns per tags, full-text search su ai_description |
+| **DB** | Azure SQL Database + EF Core | Full-text search, JSON columns per tag arrays (EF Core) |
 | **Office Map** | Azure Maps + static GeoJSON | Uffici AGIC hard-coded come GeoJSON → clustering nativo Maps |
 | **Swipe UI** | react-tinder-card | 30 min di integrazione, effetto wow garantito |
 | **CI/CD POC** | GitHub Actions → ACR → Container Apps | Pipeline 3-step: `dotnet build` + `dotnet test` + Docker push |
