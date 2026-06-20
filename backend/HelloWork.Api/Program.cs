@@ -1,3 +1,4 @@
+using HelloWork.Api.Hubs;
 using HelloWork.Api.Infrastructure;
 using HelloWork.Api.Models;
 using HelloWork.Api.Services;
@@ -41,7 +42,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<MatchingService>();
 builder.Services.AddScoped<AadGraphService>();
+builder.Services.AddScoped<IBotService, BotService>();
+builder.Services.AddHttpClient("news");
+builder.Services.AddScoped<NewsService>();
+builder.Services.AddHostedService<BotSchedulerService>();
 
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -52,7 +58,8 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
         policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials()); // Required for SignalR WebSocket negotiate
 });
 
 builder.Services.AddApplicationInsightsTelemetry();
@@ -161,6 +168,10 @@ using (var scope = app.Services.CreateScope())
             new GroupMember { GroupId = groups[2].Id, UserId = seedUsers[2].Id }
         );
         await dbCtx.SaveChangesAsync();
+
+        // Enable proactive bot for all seeded groups
+        dbCtx.BotSchedules.AddRange(groups.Select(g => new BotSchedule { GroupId = g.Id }));
+        await dbCtx.SaveChangesAsync();
     }
 }
 
@@ -175,6 +186,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
    .AllowAnonymous()
