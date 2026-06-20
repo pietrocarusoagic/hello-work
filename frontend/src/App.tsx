@@ -54,8 +54,8 @@ export default function App() {
 
   if (bootstrapping) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400 text-sm">
-        Inizializzazione profilo…
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-agic-dark">
+        <div className="text-gray-400 dark:text-white/40 text-sm font-inter">Inizializzazione profilo…</div>
       </div>
     )
   }
