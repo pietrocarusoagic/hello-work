@@ -7,8 +7,6 @@
 
 **Documento:** Stima OdG Costi di Esercizio — Infrastruttura Azure  
 **Progetto:** Hello Work  
-**Area:** CAI — Cloud, App & Infrastructure  
-**Referente tecnico:** Alessandro Rapiti  
 **Versione:** 2.0 (revisione FinOps)  
 **Data:** 20 giugno 2026  
 **Stato:** Draft — in attesa di review architetturale
@@ -492,7 +490,7 @@ Prima del go-live in produzione, verificare che siano attivi:
 
 ---
 
-*Documento redatto su brief di Alessandro Rapiti (area CAI — Cloud, App & Infrastructure)*  
+*AGIC — Giugno 2026*  
 *Revisione FinOps v2.0 — 20 giugno 2026*
 ```
 

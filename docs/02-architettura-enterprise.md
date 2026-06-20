@@ -1,6 +1,5 @@
-# Hello Work — Architettura Enterprise (Revisione CAI)
+# Hello Work — Architettura Enterprise
 
-> **Revisione**: Alessandro Rapiti — Area CAI (CloudApp & Infra)
 > **Data revisione**: 20 giugno 2026
 > **Versione**: Enterprise Rev. 1.0
 > **Stato**: Architettura target — soggetta ad Assessment Architetturale prima dell'adozione
@@ -514,7 +513,7 @@ Q1 2027 — Scale
 ---
 
 *Hello Work — Enterprise Architecture*
-*Revisione CAI (Alessandro Rapiti) — 20 giugno 2026*
+*AGIC — Giugno 2026*
 *Gilbert — Solution Architect, AGIC AI Team*
 ```
 

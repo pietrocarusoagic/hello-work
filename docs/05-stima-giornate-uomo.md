@@ -1,6 +1,5 @@
 # Hello Work — Stima Giornate Uomo
-**v1.1 — Revisione Governance** · 20 Giugno 2026
-*Revisione richiesta da: Alessandro Rapiti — Area CAI (CloudApp & Infrastructure)*
+**v1.1** · 20 Giugno 2026
 
 ---
 
@@ -128,7 +127,21 @@ Le tariffe utilizzate sono coerenti con il documento Offerta Commerciale (doc 06
 
 ---
 
-## 6. Perimetro della Stima e Cosa Non Include
+## 6. Riferimento alle Fasi di Progetto
+
+La stima è articolata su tre livelli distinti con effort molto diversi:
+
+| Fase | Descrizione | Effort stimato | Orizzonte |
+|---|---|:---:|---|
+| **Prototipo navigabile** | Interfaccia dimostrativa con dati simulati, flussi chiave navigabili, nessuna integrazione reale | **< 1 gg/u** | Ore / 1 giorno |
+| **POC validabile** | Architettura reale, autenticazione funzionante, dati persistiti su DB, deploy su cloud | **15–25 gg/u** | 4–6 settimane |
+| **v1.0 completa** | Tutti i moduli, testing, DevOps, sicurezza, documentazione, UAT | **299 gg/u** | 3 mesi |
+
+> Il breakdown nelle sezioni precedenti si riferisce alla **v1.0 completa**. Il POC e il prototipo hanno scope e costi radicalmente inferiori e devono essere stimati separatamente in funzione del perimetro concordato.
+
+---
+
+## 7. Perimetro della Stima e Cosa Non Include
 
 **Incluso:**
 - Tutte le attività di analisi, progettazione, sviluppo, testing e go-live della v1.0

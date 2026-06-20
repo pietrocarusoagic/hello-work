@@ -1,6 +1,5 @@
 # Hello Work — Documento di Analisi Funzionale
-**v1.1 — Revisione Governance** · 20 Giugno 2026
-*Revisione richiesta da: Alessandro Rapiti — Area CAI (CloudApp & Infrastructure)*
+**v1.1** · 20 Giugno 2026
 
 ---
 
@@ -462,9 +461,7 @@ Mese 6   │ Go-live v1.0 · Hypercare · Planning v2.0
 
 ---
 
-*Documento di Analisi Funzionale — Hello Work v1.1 (Revisione Governance)*
 *Prodotto da: Team Hello Work — AGIC · 20 Giugno 2026*
-*Revisione governance richiesta da: Alessandro Rapiti — Area CAI (CloudApp & Infrastructure)*
 
 ---
 

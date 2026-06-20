@@ -1,6 +1,5 @@
-# Hello Work — Architettura POC (Revisione CAI)
+# Hello Work — Architettura POC
 
-> **Revisione**: Alessandro Rapiti — Area CAI (CloudApp & Infra)
 > **Data revisione**: 20 giugno 2026
 > **Versione**: POC Rev. 1.0
 
@@ -317,7 +316,7 @@ Le seguenti aree sono **fuori perimetro** per la fase POC e devono essere proget
 ---
 
 *Hello Work — POC Architecture*
-*Revisione CAI (Alessandro Rapiti) — 20 giugno 2026*
+*AGIC — Giugno 2026*
 ```
 
 ---
