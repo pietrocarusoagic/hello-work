@@ -7,11 +7,14 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         inter: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
         'agic-dark': '#121320',
         'agic-card': '#1a1b2e',
         'agic-border': 'rgba(255,255,255,0.08)',
+        'agic-border-dark': '#252639',
+        'agic-white': '#FFFFFF',
         'agic-primary': '#DC0278',
         'agic-secondary': '#EB5E2D',
         primary: {
@@ -26,10 +29,10 @@ export default {
       backgroundImage: {
         'gradient-agic': 'linear-gradient(135deg, #DC0278 0%, #EB5E2D 100%)',
         'gradient-agic-text': 'linear-gradient(90deg, #DC0278 0%, #EB5E2D 100%)',
+        'gradient-highlight': 'linear-gradient(90deg, #EB5E2D 0%, #DC0278 100%)',
       },
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+      letterSpacing: {
+        tightest: '-0.04em',
       },
     },
   },
