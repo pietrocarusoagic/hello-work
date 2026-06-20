@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-gray-50 text-gray-900;
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-white dark:bg-agic-dark text-gray-900 dark:text-white transition-colors duration-200;
+  }
+
+  * {
+    @apply border-gray-200 dark:border-agic-border;
+  }
+}
+
+@layer utilities {
+  .gradient-text {
+    @apply bg-gradient-to-r from-agic-primary to-agic-secondary bg-clip-text text-transparent;
+  }
+
+  .gradient-bg {
+    @apply bg-gradient-to-r from-agic-primary to-agic-secondary;
+  }
+
+  .card {
+    @apply bg-white dark:bg-agic-card border border-gray-100 dark:border-agic-border rounded-xl;
+  }
+
+  .card-2xl {
+    @apply bg-white dark:bg-agic-card border border-gray-100 dark:border-agic-border rounded-2xl;
+  }
 }
