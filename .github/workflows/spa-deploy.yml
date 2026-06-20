@@ -9,7 +9,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: read
 
 env:
@@ -44,16 +43,16 @@ jobs:
       - name: Build (Vite)
         working-directory: frontend
         run: npm run build
-        # No VITE_API_BASE_URL needed — the SPA uses a relative /api path
-        # (see frontend/src/lib/api.ts). Front Door routes /api/* to the
-        # Container App on the same hostname, so no absolute URL is required.
+        # No VITE_API_BASE_URL needed — the SPA uses a relative /api path.
+        # Front Door routes /api/* to the Container App on the same hostname.
 
-      - name: Azure Login (OIDC — no long-lived secrets)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.ARM_CLIENT_ID }}
-          tenant-id: ${{ secrets.ARM_TENANT_ID }}
-          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      - name: Azure Login
+        run: |
+          az login --service-principal \
+            --username f11a1b61-52b2-45a7-8bf9-109194d255e4 \
+            --password "${{ secrets.ARM_CLIENT_SECRET }}" \
+            --tenant d5e193bb-0b46-467d-9d95-03eb0d012c42
+          az account set --subscription aa9de1ef-b9ca-4053-88a0-7f11d2a197fa
 
       - name: Retrieve Static Web App deployment token
         id: swa-token

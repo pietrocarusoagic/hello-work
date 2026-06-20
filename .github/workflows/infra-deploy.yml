@@ -9,15 +9,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: read
 
 env:
   TF_WORKING_DIR: infra
-  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-  ARM_USE_OIDC: "true"
+  ARM_SUBSCRIPTION_ID: aa9de1ef-b9ca-4053-88a0-7f11d2a197fa
+  ARM_TENANT_ID: d5e193bb-0b46-467d-9d95-03eb0d012c42
+  ARM_CLIENT_ID: f11a1b61-52b2-45a7-8bf9-109194d255e4
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
 
 jobs:
   terraform:
@@ -29,19 +28,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.ARM_CLIENT_ID }}
-          tenant-id: ${{ secrets.ARM_TENANT_ID }}
-          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      - name: Azure Login
+        run: |
+          az login --service-principal \
+            --username f11a1b61-52b2-45a7-8bf9-109194d255e4 \
+            --password "${{ secrets.ARM_CLIENT_SECRET }}" \
+            --tenant d5e193bb-0b46-467d-9d95-03eb0d012c42
+          az account set --subscription aa9de1ef-b9ca-4053-88a0-7f11d2a197fa
 
-      # Derive the SP object ID from the client ID already available as a secret.
-      # This avoids storing a separate GH_SP_OBJECT_ID secret.
       - name: Resolve GitHub Actions SP object ID
         id: sp
         run: |
-          OBJECT_ID=$(az ad sp show --id ${{ secrets.ARM_CLIENT_ID }} --query id -o tsv)
+          OBJECT_ID=$(az ad sp show --id f11a1b61-52b2-45a7-8bf9-109194d255e4 --query id -o tsv)
           echo "object_id=$OBJECT_ID" >> $GITHUB_OUTPUT
 
       - name: Setup Terraform
@@ -51,9 +49,6 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
-        # Backend authenticates via OIDC (use_oidc = true in main.tf).
-        # Prereq: GitHub Actions SP must have Storage Blob Data Contributor
-        # on the sthelloworktfstate storage account (one-time manual grant).
         run: terraform init
 
       - name: Terraform Validate
@@ -64,10 +59,8 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform plan \
-            -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" \
             -var="sql_admin_password=${{ secrets.SQL_ADMIN_PASSWORD }}" \
             -var="github_actions_sp_object_id=${{ steps.sp.outputs.object_id }}" \
-            -var="aad_tenant_id=${{ secrets.ARM_TENANT_ID }}" \
             -var="aad_client_id=${{ secrets.AAD_CLIENT_ID }}" \
             -var="alert_email=${{ secrets.ALERT_EMAIL }}" \
             -var-file=environments/prod.tfvars \

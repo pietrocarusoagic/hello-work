@@ -9,14 +9,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: read
 
 env:
   ACR_NAME: acrhellowork
   IMAGE_NAME: hellowork-api
   CONTAINER_APP_NAME: ca-hellowork-api
-  RESOURCE_GROUP: rg-hellowork
+  RESOURCE_GROUP: rg-red
 
 jobs:
   build-and-deploy:
@@ -45,12 +44,13 @@ jobs:
         working-directory: backend
         run: dotnet test HelloWork.sln --no-build -c Release --verbosity normal
 
-      - name: Azure Login (OIDC — no long-lived secrets)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.ARM_CLIENT_ID }}
-          tenant-id: ${{ secrets.ARM_TENANT_ID }}
-          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      - name: Azure Login
+        run: |
+          az login --service-principal \
+            --username f11a1b61-52b2-45a7-8bf9-109194d255e4 \
+            --password "${{ secrets.ARM_CLIENT_SECRET }}" \
+            --tenant d5e193bb-0b46-467d-9d95-03eb0d012c42
+          az account set --subscription aa9de1ef-b9ca-4053-88a0-7f11d2a197fa
 
       - name: Login to ACR
         run: az acr login --name ${{ env.ACR_NAME }}
