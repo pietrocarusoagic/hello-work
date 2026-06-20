@@ -12,7 +12,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [searchResults, setSearchResults] = useState<UserProfile[]>([])
-  const [searching, setSearching] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -26,11 +25,9 @@ export default function Home() {
   }, [])
 
   const runSearch = useCallback((q: string) => {
-    setSearching(true)
     api.get<UserProfile[]>(`/profiles?q=${encodeURIComponent(q)}`)
       .then(setSearchResults)
       .catch(console.error)
-      .finally(() => setSearching(false))
   }, [])
 
   const handleQueryChange = (value: string) => {
@@ -59,34 +56,28 @@ export default function Home() {
         <p className="text-white/50 text-sm mt-1">Scopri i tuoi colleghi</p>
       </div>
 
-      {profile && <div className="mb-6"><ProfileCompleteness score={profile.profileScore} /></div>}
-
-      <div className="grid grid-cols-2 gap-3 mb-8">
-        {[
-          { to: '/workmatch', emoji: '❤️', label: 'WorkMatch', desc: 'Scopri colleghi compatibili' },
-          { to: '/groups', emoji: '👥', label: 'Gruppi', desc: 'Comunità di interesse' },
-          { to: '/map', emoji: '📍', label: 'Mappa Uffici', desc: 'Chi è dove' },
-          { to: '/profile', emoji: '✏️', label: 'Il mio profilo', desc: 'Completa il tuo profilo' },
-        ].map(({ to, emoji, label, desc }) => (
-          <Link
-            key={to}
-            to={to}
-            className="bg-agic-card rounded-xl p-4 border border-agic-border hover:border-agic-primary/30 hover:bg-agic-primary/5 transition-all"
-          >
-            <div className="text-2xl mb-1">{emoji}</div>
-            <div className="font-semibold text-sm text-white">{label}</div>
-            <div className="text-xs text-white/40">{desc}</div>
-          </Link>
-        ))}
+      {/* Search bar */}
+      <div className="mb-6">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => handleQueryChange(e.target.value)}
+          placeholder="Cerca un collega per nome, ruolo o skill…"
+          className="w-full bg-agic-card border border-agic-border rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-agic-primary/60"
+        />
       </div>
 
-      {/* Search results */}
       {query.trim() ? (
+        /* Search results */
         <div>
-          <h2 className="font-semibold text-white/70 mb-3 text-sm uppercase tracking-wide">Persone che potresti conoscere</h2>
-          <div className="space-y-3">
-            {searchResults.map((u) => <ColleagueCard key={u.id} user={u} />)}
-          </div>
+          <h2 className="font-semibold text-white/70 mb-3 text-sm uppercase tracking-wide">Risultati ricerca</h2>
+          {searchResults.length === 0 ? (
+            <p className="text-white/40 text-sm">Nessun risultato per &ldquo;{query}&rdquo;</p>
+          ) : (
+            <div className="space-y-3">
+              {searchResults.map((u) => <ColleagueCard key={u.id} user={u} />)}
+            </div>
+          )}
         </div>
       ) : (
         <>
@@ -100,22 +91,13 @@ export default function Home() {
               { to: '/profile', emoji: '✏️', label: 'Il mio profilo', desc: 'Completa il tuo profilo' },
             ].map(({ to, emoji, label, desc }) => (
               <Link
-                key={s.id}
-                to={`/profile/${s.id}`}
-                className="bg-agic-card rounded-xl p-4 border border-agic-border flex items-center gap-3 hover:border-agic-primary/30 transition-all"
+                key={to}
+                to={to}
+                className="bg-agic-card rounded-xl p-4 border border-agic-border hover:border-agic-primary/30 hover:bg-agic-primary/5 transition-all"
               >
-                {s.avatarUrl ? (
-                  <img src={s.avatarUrl} alt={s.displayName} className="w-10 h-10 rounded-full" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-agic-primary/20 flex items-center justify-center font-bold text-agic-primary">
-                    {s.displayName.charAt(0)}
-                  </div>
-                )}
-                <div className="flex-1">
-                  <div className="font-medium text-sm text-white">{s.displayName}</div>
-                  <div className="text-xs text-white/40">{s.role}</div>
-                </div>
-                <div className="text-sm font-bold text-gradient-agic">{Math.round(s.matchScore * 100)}%</div>
+                <div className="text-2xl mb-1">{emoji}</div>
+                <div className="font-semibold text-sm text-white">{label}</div>
+                <div className="text-xs text-white/40">{desc}</div>
               </Link>
             ))}
           </div>
@@ -176,7 +158,7 @@ function ColleagueCard({ user }: { user: UserProfile }) {
         </div>
         <div className="flex flex-wrap gap-1">
           {topSkills.map((s) => (
-            <span key={s} className="px-1.5 py-0.5 bg-agic-primary/10 text-agic-primary dark:text-agic-primary rounded-full text-xs">💼 {s}</span>
+            <span key={s} className="px-1.5 py-0.5 bg-agic-primary/10 text-agic-primary rounded-full text-xs">💼 {s}</span>
           ))}
           {topInterests.map((s) => (
             <span key={s} className="px-1.5 py-0.5 bg-agic-secondary/10 text-agic-secondary rounded-full text-xs">❤️ {s}</span>
