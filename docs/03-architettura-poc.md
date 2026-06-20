@@ -316,7 +316,7 @@ Le seguenti aree sono **fuori perimetro** per la fase POC e devono essere proget
 ---
 
 *Hello Work — POC Architecture*
-*AGIC — Giugno 2026*
+*Team Red — Giugno 2026*
 ```
 
 ---
