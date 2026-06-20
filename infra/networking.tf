@@ -30,20 +30,8 @@ module "vnet" {
       }
     }
 
-    # PostgreSQL VNet delegation — delegated to DBforPostgreSQL/flexibleServers.
-    "snet-postgres" = {
-      address_prefixes                  = ["10.0.2.0/24"]
-      private_endpoint_network_policies = "Disabled"
-      delegation = {
-        name = "delegation-postgres"
-        service_delegation = {
-          name    = "Microsoft.DBforPostgreSQL/flexibleServers"
-          actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-        }
-      }
-    }
-
-    # Shared private endpoints subnet: Key Vault + Blob Storage.
+    # Shared private endpoints subnet: Key Vault + Blob Storage + Azure SQL.
+    # snet-postgres replaced — Azure SQL uses a private endpoint (not VNet delegation).
     "snet-pe" = {
       address_prefixes                  = ["10.0.3.0/24"]
       private_endpoint_network_policies = "Disabled"
@@ -55,7 +43,7 @@ module "vnet" {
 
 # ---------------------------------------------------------------------------
 # Private DNS Zones
-# One zone per service that uses a private endpoint or VNet delegation.
+# One zone per service that uses a private endpoint.
 # Each zone is linked to vnet-hellowork for DNS resolution within the VNet.
 # ---------------------------------------------------------------------------
 
@@ -85,13 +73,13 @@ module "dns_blob" {
   tags = local.common_tags
 }
 
-# Required even with VNet delegation (not PE): Azure uses this zone for
-# private name resolution of the delegated PostgreSQL server FQDN.
-module "dns_postgres" {
+# Azure SQL Database private endpoint DNS zone.
+# Replaces the former PostgreSQL dns_postgres zone.
+module "dns_sql" {
   source = "git::https://github.com/AgicCompany/Standard.Terraform-Modules.git//modules/private-dns-zone?ref=private-dns-zone/v1.0.0"
 
   resource_group_name = azurerm_resource_group.main.name
-  name                = "privatelink.postgres.database.azure.com"
+  name                = "privatelink.database.windows.net"
 
   virtual_network_links = {
     vnet-hellowork = { virtual_network_id = module.vnet.id }

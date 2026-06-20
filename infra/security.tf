@@ -1,8 +1,9 @@
 # ---------------------------------------------------------------------------
 # Key Vault
 # ---------------------------------------------------------------------------
-# enable_purge_protection = false: allows easy vault deletion during dev/POC.
-# Set to true before going to production — once enabled it cannot be undone.
+# enable_purge_protection = true: production hardening — once enabled, the
+# vault cannot be purged even after deletion. Prevents accidental permanent
+# data loss. This is a one-way door and cannot be reverted.
 # ---------------------------------------------------------------------------
 
 module "keyvault" {
@@ -16,7 +17,7 @@ module "keyvault" {
   subnet_id                  = module.vnet.subnet_ids["snet-pe"]
   private_dns_zone_id        = module.dns_keyvault.id
 
-  enable_purge_protection    = false # Set true before production
+  enable_purge_protection    = true # Production: must be enabled; cannot be reverted
   soft_delete_retention_days = 7
 
   diagnostic_settings = {
@@ -41,9 +42,12 @@ module "keyvault" {
 # propagated.
 # ---------------------------------------------------------------------------
 
+# ADO.NET SQL Server connection string (matches EF Core UseSqlServer expectation).
+# The ConnectionStrings__DefaultConnection env var is injected into the Container
+# App and overrides appsettings.json at runtime.
 resource "azurerm_key_vault_secret" "db_conn_string" {
   name  = "db-conn-string"
-  value = "postgresql+asyncpg://${var.postgres_admin_login}:${var.postgres_admin_password}@${module.postgresql.fqdn}/hellowork?sslmode=require"
+  value = "Server=tcp:${azurerm_mssql_server.main.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.main.name};Persist Security Info=False;User ID=${var.sql_admin_login};Password=${var.sql_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
   key_vault_id = module.keyvault.id
 

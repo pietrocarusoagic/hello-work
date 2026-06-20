@@ -23,9 +23,9 @@ module "law" {
 # ---------------------------------------------------------------------------
 # Application Insights (workspace-based)
 # ---------------------------------------------------------------------------
-# local_authentication_disabled = false: allows connection-string-based
-# ingestion for simpler POC SDK configuration.
-# Set to true in production to enforce managed identity auth only.
+# local_authentication_disabled = true: enforces managed identity auth only.
+# Connection-string-based ingestion is disabled in production — the Container
+# App uses DefaultAzureCredential (user-assigned MI) to ship telemetry.
 # ---------------------------------------------------------------------------
 
 module "appi" {
@@ -40,7 +40,7 @@ module "appi" {
   sampling_percentage           = 100
   internet_ingestion_enabled    = true
   internet_query_enabled        = true
-  local_authentication_disabled = false
+  local_authentication_disabled = true # Production: managed identity only
 
   tags = local.common_tags
 }
@@ -78,18 +78,18 @@ module "action_group" {
 # Metric Alerts (§7.4 of architecture doc)
 # ---------------------------------------------------------------------------
 
-# PostgreSQL CPU sustained above 80% for 10 minutes (Sev 3)
-resource "azurerm_monitor_metric_alert" "postgresql_cpu" {
-  name                = "alert-hellowork-postgres-cpu"
+# Azure SQL Database — CPU sustained above 80% for 10 minutes (Sev 3)
+resource "azurerm_monitor_metric_alert" "sql_cpu" {
+  name                = "alert-hellowork-sql-cpu"
   resource_group_name = azurerm_resource_group.main.name
-  scopes              = [module.postgresql.id]
-  description         = "PostgreSQL CPU utilization sustained above 80%"
+  scopes              = [azurerm_mssql_database.main.id]
+  description         = "Azure SQL Database CPU utilization sustained above 80%"
   severity            = 3
   frequency           = "PT5M"
   window_size         = "PT10M"
 
   criteria {
-    metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
+    metric_namespace = "Microsoft.Sql/servers/databases"
     metric_name      = "cpu_percent"
     aggregation      = "Average"
     operator         = "GreaterThan"
@@ -102,6 +102,7 @@ resource "azurerm_monitor_metric_alert" "postgresql_cpu" {
 }
 
 # Container App — zero replicas running for more than 2 minutes (Sev 1)
+# Note: min_replicas = 1 prevents false alerts during off-hours.
 resource "azurerm_monitor_metric_alert" "container_app_replicas" {
   name                = "alert-hellowork-api-no-replicas"
   resource_group_name = azurerm_resource_group.main.name
@@ -109,7 +110,7 @@ resource "azurerm_monitor_metric_alert" "container_app_replicas" {
   description         = "Container App has 0 running replicas — service unavailable"
   severity            = 1
   frequency           = "PT1M"
-  window_size         = "PT5M"
+  window_size         = "PT2M" # Matches architecture doc §7.4 (2 min)
 
   criteria {
     metric_namespace = "Microsoft.App/containerApps"
@@ -125,6 +126,7 @@ resource "azurerm_monitor_metric_alert" "container_app_replicas" {
 }
 
 # Key Vault — any HTTP 403 Forbidden response (Sev 2)
+# window_size matches architecture doc §7.4 (1 min evaluation window)
 resource "azurerm_monitor_metric_alert" "kv_access_denied" {
   name                = "alert-hellowork-kv-access-denied"
   resource_group_name = azurerm_resource_group.main.name
@@ -132,7 +134,7 @@ resource "azurerm_monitor_metric_alert" "kv_access_denied" {
   description         = "Key Vault returned HTTP 403 Forbidden — possible misconfigured RBAC"
   severity            = 2
   frequency           = "PT1M"
-  window_size         = "PT5M"
+  window_size         = "PT1M" # Matches architecture doc §7.4 (1 min)
 
   criteria {
     metric_namespace = "Microsoft.KeyVault/vaults"
@@ -153,25 +155,50 @@ resource "azurerm_monitor_metric_alert" "kv_access_denied" {
   }
 }
 
-# OpenAI p95 dependency latency degraded above 15s (Sev 3)
-resource "azurerm_monitor_metric_alert" "openai_latency" {
+# ---------------------------------------------------------------------------
+# OpenAI latency alert — Log Analytics scheduled query
+# ---------------------------------------------------------------------------
+# The Cognitive Services metric namespace does not expose a percentile latency
+# metric. The correct approach is a KQL query over Application Insights
+# dependency traces — this fires when p95 duration for OpenAI calls exceeds
+# the 15-second threshold defined in architecture doc §7.4.
+# ---------------------------------------------------------------------------
+
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "openai_latency" {
   name                = "alert-hellowork-openai-latency"
   resource_group_name = azurerm_resource_group.main.name
-  scopes              = [module.openai.id]
-  description         = "Azure OpenAI p95 latency above 15s — coffee chat suggestions may be slow"
+  location            = var.location
+  description         = "Azure OpenAI p95 dependency latency above 15s — coffee chat suggestions may be slow"
   severity            = 3
-  frequency           = "PT5M"
-  window_size         = "PT10M"
+
+  evaluation_frequency = "PT5M"
+  window_duration      = "PT10M"
+
+  # Scope: the Log Analytics workspace that backs Application Insights
+  scopes = [module.law.id]
 
   criteria {
-    metric_namespace = "Microsoft.CognitiveServices/accounts"
-    metric_name      = "SuccessfulCalls"
-    aggregation      = "Total"
-    operator         = "LessThan"
-    threshold        = 1
+    query = <<-KQL
+      dependencies
+      | where cloud_RoleName == "ca-hellowork-api"
+      | where type == "HTTP" and (target contains "openai" or target contains "aoai-hellowork")
+      | summarize p95_duration = percentile(duration, 95) by bin(timestamp, 5m)
+      | where p95_duration > 15000
+    KQL
+
+    time_aggregation_method = "Count"
+    operator                = "GreaterThan"
+    threshold               = 0
+
+    failing_periods {
+      minimum_failing_periods_to_trigger_alert = 1
+      number_of_evaluation_periods             = 1
+    }
   }
 
   action {
-    action_group_id = module.action_group.id
+    action_groups = [module.action_group.id]
   }
+
+  tags = local.common_tags
 }

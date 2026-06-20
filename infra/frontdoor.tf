@@ -10,12 +10,13 @@
 # The lower priority number wins when both patterns match a request.
 # A request to /api/profiles matches api-route (100) not spa-route (200).
 #
-# WAF: Prevention mode + Microsoft_DefaultRuleSet 2.1 (OWASP 3.2 equivalent).
-# Custom rate-limiting rules require module v1.2.0+ (deferred).
+# WAF: Prevention mode + Microsoft_DefaultRuleSet 2.1 (OWASP 3.2 equivalent)
+#      + custom rate-limit rule: 100 req/min per client IP.
 #
 # X-Azure-FDID header: Azure Front Door automatically adds this header to
-# every forwarded request. The FastAPI middleware validates it against the
-# expected Front Door profile ID to reject direct-to-origin requests.
+# every forwarded request. The Container App middleware validates it against
+# the expected Front Door profile ID (AZURE_FRONT_DOOR_ID env var) to reject
+# direct-to-origin requests.
 # ---------------------------------------------------------------------------
 
 # Stable Container App FQDN (app-level, not revision-specific).
@@ -26,7 +27,7 @@ locals {
 }
 
 module "frontdoor" {
-  source = "git::https://github.com/AgicCompany/Standard.Terraform-Modules.git//modules/front-door?ref=front-door/v1.1.0"
+  source = "git::https://github.com/AgicCompany/Standard.Terraform-Modules.git//modules/front-door?ref=front-door/v1.2.0"
 
   resource_group_name = azurerm_resource_group.main.name
   name                = "afd-hellowork"
@@ -89,7 +90,7 @@ module "frontdoor" {
   }
 
   # Prevention mode: blocks matched requests rather than just logging.
-  # Custom rate-limiting rules (100 req/min per IP) require module v1.2.0+.
+  # custom_rules requires front-door module v1.2.0+.
   waf = {
     name = "wafpol-hellowork"
     mode = "Prevention"
@@ -98,6 +99,24 @@ module "frontdoor" {
         type    = "Microsoft_DefaultRuleSet"
         version = "2.1"
         action  = "Block"
+      }
+    ]
+    custom_rules = [
+      {
+        name                           = "RateLimitPerIp"
+        priority                       = 100
+        rule_type                      = "RateLimitRule"
+        action                         = "Block"
+        rate_limit_duration_in_minutes = 1
+        rate_limit_threshold           = 100 # max 100 req/min per client IP (architecture doc §4.2)
+        match_conditions = [
+          {
+            match_variable = "RemoteAddr"
+            operator       = "IPMatch"
+            match_values   = ["0.0.0.0/0"] # Applies to all IPs
+            negation_condition = false
+          }
+        ]
       }
     ]
   }

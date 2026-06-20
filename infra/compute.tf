@@ -3,11 +3,11 @@
 # ---------------------------------------------------------------------------
 # enable_internal_load_balancer = false (default): environment is externally
 # accessible. Front Door is the only permitted ingress path because the
-# Container App enforces the X-Azure-FDID header in FastAPI middleware.
+# Container App enforces the X-Azure-FDID header in middleware.
 #
 # infrastructure_subnet_id = snet-cae: VNet integration enables the Container
-# App to reach private resources inside the VNet (PostgreSQL delegation,
-# Key Vault PE, Blob Storage PE) without traversing the public internet.
+# App to reach private resources inside the VNet (Azure SQL PE, Key Vault PE,
+# Blob Storage PE) without traversing the public internet.
 # ---------------------------------------------------------------------------
 
 module "cae" {
@@ -25,16 +25,21 @@ module "cae" {
 }
 
 # ---------------------------------------------------------------------------
-# Container App — FastAPI Backend API
+# Container App — ASP.NET Core 10 Backend API
 # ---------------------------------------------------------------------------
-# Secrets are injected directly (not via Key Vault references) because the
-# AGIC module uses map(string) for secrets. The values are sourced from
-# Terraform outputs of PostgreSQL, Maps, and App Insights modules — they are
-# never hardcoded and are marked sensitive in the state.
+# Port: ASP.NET Core listens on 8080 by default (set by ASPNETCORE_HTTP_PORTS
+# or ASPNETCORE_URLS in the base image). The Dockerfile confirms EXPOSE 8080.
+#
+# Secrets are injected directly into the Container App secret store.
+# Values are sourced from Terraform outputs — never hardcoded.
+#
+# Config injection: ASP.NET Core reads env vars using __ as hierarchy separator.
+#   AzureAd__TenantId  →  appsettings.json "AzureAd:TenantId"
+#   ConnectionStrings__DefaultConnection  →  appsettings.json connection string
 #
 # Image lifecycle note:
 #   The initial image is a Microsoft placeholder. CI/CD overrides it with:
-#     terraform apply -var="api_image=acr-hellowork.azurecr.io/hellowork-api:<sha>"
+#     terraform apply -var="api_image=acrhellowork.azurecr.io/hellowork-api:<sha>"
 #   Do NOT run terraform apply without passing api_image after CI/CD has
 #   deployed a real image, or the placeholder will be re-applied.
 # ---------------------------------------------------------------------------
@@ -52,16 +57,63 @@ module "container_app" {
     memory = "1Gi"
 
     env = {
-      # Plain-text env vars
-      "APP_ENV" = {
-        value = var.env
+      # ---------------------------------------------------------------------------
+      # ASP.NET Core runtime
+      # ---------------------------------------------------------------------------
+      "ASPNETCORE_ENVIRONMENT" = {
+        value = "Production" # Disables Swagger UI and detailed error pages
       }
+      "ASPNETCORE_HTTP_PORTS" = {
+        value = "8080" # Explicit — matches Dockerfile EXPOSE and probe config below
+      }
+
+      # ---------------------------------------------------------------------------
+      # Azure AD — JWT validation and app registration
+      # Uses __ separator for ASP.NET Core hierarchical config binding
+      # ---------------------------------------------------------------------------
+      "AzureAd__Instance" = {
+        value = "https://login.microsoftonline.com/"
+      }
+      "AzureAd__TenantId" = {
+        value = var.aad_tenant_id
+      }
+      "AzureAd__ClientId" = {
+        value = var.aad_client_id
+      }
+      "AzureAd__Audience" = {
+        value = "api://${var.aad_client_id}"
+      }
+
+      # ---------------------------------------------------------------------------
+      # Azure Managed Identity — user-assigned
+      # AZURE_CLIENT_ID is required so DefaultAzureCredential selects the correct
+      # user-assigned identity when multiple identities might be present.
+      # ---------------------------------------------------------------------------
+      "AZURE_CLIENT_ID" = {
+        value = module.api_identity.client_id
+      }
+
+      # ---------------------------------------------------------------------------
+      # Front Door ID — X-Azure-FDID header validation
+      # The middleware reads this value to reject requests that bypass Front Door.
+      # ---------------------------------------------------------------------------
+      "AZURE_FRONT_DOOR_ID" = {
+        value = module.frontdoor.resource_id
+      }
+
+      # ---------------------------------------------------------------------------
+      # Azure OpenAI (coffee chat suggestions)
+      # ---------------------------------------------------------------------------
       "AZURE_OPENAI_ENDPOINT" = {
         value = module.openai.endpoint
       }
       "AZURE_OPENAI_DEPLOYMENT" = {
         value = module.openai.deployment_name
       }
+
+      # ---------------------------------------------------------------------------
+      # Matching algorithm weights (configurable without redeployment)
+      # ---------------------------------------------------------------------------
       "MATCHING_WEIGHTS_PROFESSIONAL" = {
         value = "0.40"
       }
@@ -74,32 +126,44 @@ module "container_app" {
       "MATCH_CACHE_TTL_MINUTES" = {
         value = "60"
       }
+
+      # ---------------------------------------------------------------------------
+      # CORS — allow the Front Door endpoint only (not the raw Static Web App URL)
+      # Uses __ separator for ASP.NET Core array config binding
+      # ---------------------------------------------------------------------------
+      "Cors__AllowedOrigins__0" = {
+        value = "https://${module.frontdoor.endpoint_host_names["hellowork"]}"
+      }
+
+      # ---------------------------------------------------------------------------
       # Secret-backed env vars (resolved from Container App secret store)
-      "DATABASE_URL" = {
+      # ConnectionStrings__ prefix used for ASP.NET Core connection string binding
+      # ---------------------------------------------------------------------------
+      "ConnectionStrings__DefaultConnection" = {
         secret_name = "db-conn-string"
       }
-      "AZURE_MAPS_KEY" = {
+      "AzureMaps__SubscriptionKey" = {
         secret_name = "maps-api-key"
       }
-      "APPLICATIONINSIGHTS_CONNECTION_STRING" = {
+      "ApplicationInsights__ConnectionString" = {
         secret_name = "appinsights-conn-string"
       }
     }
 
     liveness_probe = {
       transport               = "HTTP"
-      port                    = 8000
+      port                    = 8080 # ASP.NET Core default port
       path                    = "/health"
-      initial_delay           = 10
+      initial_delay           = 15
       interval_seconds        = 30
       failure_count_threshold = 3
     }
 
     readiness_probe = {
       transport               = "HTTP"
-      port                    = 8000
+      port                    = 8080 # ASP.NET Core default port
       path                    = "/health"
-      initial_delay           = 5
+      initial_delay           = 10
       interval_seconds        = 10
       failure_count_threshold = 3
     }
@@ -108,17 +172,17 @@ module "container_app" {
   # Secrets stored in the Container App secret store.
   # Values come from Terraform module outputs — never hardcoded.
   secrets = {
-    "db-conn-string" = "postgresql+asyncpg://${var.postgres_admin_login}:${var.postgres_admin_password}@${module.postgresql.fqdn}/hellowork?sslmode=require"
-    "maps-api-key"   = module.maps.primary_access_key
+    "db-conn-string"          = "Server=tcp:${azurerm_mssql_server.main.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.main.name};Persist Security Info=False;User ID=${var.sql_admin_login};Password=${var.sql_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    "maps-api-key"            = module.maps.primary_access_key
     "appinsights-conn-string" = data.azurerm_application_insights.appi.connection_string
   }
 
   # External ingress — Front Door routes /api/* here.
-  # FastAPI middleware validates X-Azure-FDID header to reject direct access.
+  # Middleware validates X-Azure-FDID header (value from AZURE_FRONT_DOOR_ID env var).
   enable_ingress          = true
   enable_external_ingress = true
   ingress = {
-    target_port = 8000
+    target_port = 8080 # ASP.NET Core default — Dockerfile EXPOSE 8080
     transport   = "http"
   }
 
@@ -134,7 +198,7 @@ module "container_app" {
   ]
 
   scale = {
-    min_replicas = 0 # Scale to zero overnight (cost optimisation)
+    min_replicas = 1 # Keep at least 1 replica running — prevents false "unavailable" alerts
     max_replicas = 5
     rules = [
       {

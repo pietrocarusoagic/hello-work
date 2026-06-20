@@ -30,10 +30,15 @@ output "key_vault_uri" {
   value       = module.keyvault.vault_uri
 }
 
-output "postgresql_fqdn" {
-  description = "PostgreSQL server FQDN (private — only reachable from within the VNet)"
-  value       = module.postgresql.fqdn
+output "sql_server_fqdn" {
+  description = "Azure SQL Server FQDN (private — only reachable from within the VNet via private endpoint)"
+  value       = azurerm_mssql_server.main.fully_qualified_domain_name
   sensitive   = true
+}
+
+output "sql_database_name" {
+  description = "Azure SQL Database name"
+  value       = azurerm_mssql_database.main.name
 }
 
 output "application_insights_connection_string" {
@@ -50,4 +55,14 @@ output "openai_endpoint" {
 output "resource_group_name" {
   description = "Resource group name for all Hello Work resources"
   value       = azurerm_resource_group.main.name
+}
+
+output "front_door_resource_id" {
+  description = "Front Door profile resource ID — injected into Container App as AZURE_FRONT_DOOR_ID for X-Azure-FDID header validation"
+  value       = module.frontdoor.resource_id
+}
+
+output "api_managed_identity_client_id" {
+  description = "Client ID of the user-assigned managed identity for the Container App — injected as AZURE_CLIENT_ID"
+  value       = module.api_identity.client_id
 }

@@ -7,10 +7,12 @@
 # CI/CD usage:
 #   terraform apply \
 #     -var="subscription_id=$ARM_SUBSCRIPTION_ID" \
-#     -var="postgres_admin_password=$POSTGRES_ADMIN_PASSWORD" \
+#     -var="sql_admin_password=$SQL_ADMIN_PASSWORD" \
 #     -var="github_actions_sp_object_id=$GH_SP_OBJECT_ID" \
+#     -var="aad_tenant_id=$AZURE_TENANT_ID" \
+#     -var="aad_client_id=$AZURE_CLIENT_ID" \
 #     -var="alert_email=$ALERT_EMAIL" \
-#     -var="api_image=acr-hellowork.azurecr.io/hellowork-api:$GITHUB_SHA"
+#     -var="api_image=acrhellowork.azurecr.io/hellowork-api:$GITHUB_SHA"
 # ---------------------------------------------------------------------------
 
 # Azure subscription ID
@@ -19,15 +21,23 @@ subscription_id = "00000000-0000-0000-0000-000000000000"
 # Azure region (westeurope required for Static Web Apps)
 location = "westeurope"
 
-# Environment context: "development" or "production"
+# Environment context: always "production" (single environment deployment)
 env = "production"
 
-# PostgreSQL administrator login
-postgres_admin_login = "psqladmin"
+# Azure SQL Server administrator login
+sql_admin_login = "sqladmin"
 
-# PostgreSQL administrator password (SENSITIVE — inject from GitHub Actions secret)
-# Minimum 12 characters; must include upper, lower, digit, and symbol.
-postgres_admin_password = "CHANGE_ME_Aa1!minimum12chars"
+# Azure SQL Server administrator password (SENSITIVE — inject from GitHub Actions secret)
+# Minimum 8 characters; must include upper, lower, digit, and symbol.
+sql_admin_password = "CHANGE_ME_Aa1!minimum8chars"
+
+# Azure AD tenant ID
+# Retrieve with: az account show --query tenantId -o tsv
+aad_tenant_id = "00000000-0000-0000-0000-000000000000"
+
+# Azure AD app registration client ID for the Hello Work API
+# Retrieve with: az ad app show --id <your-app-id> --query appId -o tsv
+aad_client_id = "00000000-0000-0000-0000-000000000000"
 
 # Object ID of the GitHub Actions service principal
 # Retrieve with: az ad sp show --id <client-id> --query id -o tsv
@@ -37,5 +47,6 @@ github_actions_sp_object_id = "00000000-0000-0000-0000-000000000000"
 alert_email = "team@example.com"
 
 # Container image for the API (override in CI/CD pipeline)
-# Default value is used for initial infrastructure deployment.
-api_image = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+# Note: ACR name is acrhellowork (no hyphens — Azure requirement)
+# Default value is used for initial infrastructure deployment only.
+api_image = "acrhellowork.azurecr.io/hellowork-api:latest"

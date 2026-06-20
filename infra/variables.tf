@@ -15,7 +15,7 @@ variable "location" {
 
 variable "env" {
   type        = string
-  description = "Environment context injected into APP_ENV and resource tags. Single physical deployment; isolation is config-level."
+  description = "Environment context injected into ASPNETCORE_ENVIRONMENT and resource tags. Single physical deployment."
   default     = "production"
 
   validation {
@@ -25,19 +25,33 @@ variable "env" {
 }
 
 # ---------------------------------------------------------------------------
-# PostgreSQL
+# Azure SQL Database
 # ---------------------------------------------------------------------------
 
-variable "postgres_admin_login" {
+variable "sql_admin_login" {
   type        = string
-  description = "PostgreSQL administrator login name"
-  default     = "psqladmin"
+  description = "Azure SQL Server administrator login name"
+  default     = "sqladmin"
 }
 
-variable "postgres_admin_password" {
+variable "sql_admin_password" {
   type        = string
-  description = "PostgreSQL administrator password. Min 12 chars; must include upper, lower, digit, and symbol. Injected from GitHub Actions secret in CI/CD."
+  description = "Azure SQL Server administrator password. Min 8 chars; must include upper, lower, digit, and symbol. Injected from GitHub Actions secret in CI/CD."
   sensitive   = true
+}
+
+# ---------------------------------------------------------------------------
+# Azure Active Directory
+# ---------------------------------------------------------------------------
+
+variable "aad_tenant_id" {
+  type        = string
+  description = "Azure AD tenant ID. Used by the backend API for JWT validation (AzureAd:TenantId) and injected into the Container App."
+}
+
+variable "aad_client_id" {
+  type        = string
+  description = "Azure AD app registration client ID for the Hello Work API. Used for audience validation (AzureAd:ClientId / AzureAd:Audience)."
 }
 
 # ---------------------------------------------------------------------------
@@ -64,6 +78,6 @@ variable "alert_email" {
 
 variable "api_image" {
   type        = string
-  description = "Container image for the FastAPI API Container App. Defaults to Microsoft placeholder on first deploy. CI/CD overrides with: -var='api_image=acr-hellowork.azurecr.io/hellowork-api:<sha>'"
+  description = "Container image for the ASP.NET Core API Container App. Defaults to Microsoft placeholder on first deploy. CI/CD overrides with: -var='api_image=acrhellowork.azurecr.io/hellowork-api:<sha>'"
   default     = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
 }

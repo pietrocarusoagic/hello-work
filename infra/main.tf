@@ -26,8 +26,9 @@ provider "azurerm" {
 
   features {
     key_vault {
-      # Allow easy vault deletion during development (disable in production)
-      purge_soft_delete_on_destroy    = true
+      # false: do NOT permanently purge the vault on destroy — rely on soft-delete.
+      # Changing this to true in a production environment risks irrecoverable secret loss.
+      purge_soft_delete_on_destroy    = false
       recover_soft_deleted_key_vaults = true
     }
   }
