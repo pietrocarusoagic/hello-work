@@ -4,7 +4,8 @@
 
 variable "subscription_id" {
   type        = string
-  description = "Azure subscription ID"
+  description = "Azure subscription ID — Agentic subscription"
+  default     = "aa9de1ef-b9ca-4053-88a0-7f11d2a197fa"
 }
 
 variable "location" {
@@ -46,7 +47,8 @@ variable "sql_admin_password" {
 
 variable "aad_tenant_id" {
   type        = string
-  description = "Azure AD tenant ID. Used by the backend API for JWT validation (AzureAd:TenantId) and injected into the Container App."
+  description = "Azure AD tenant ID. Used by the backend API for JWT validation."
+  default     = "d5e193bb-0b46-467d-9d95-03eb0d012c42"
 }
 
 variable "aad_client_id" {

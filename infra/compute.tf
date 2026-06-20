@@ -90,7 +90,7 @@ module "container_app" {
       # user-assigned identity when multiple identities might be present.
       # ---------------------------------------------------------------------------
       "AZURE_CLIENT_ID" = {
-        value = module.api_identity.client_id
+        value = data.azurerm_user_assigned_identity.api.client_id
       }
 
       # ---------------------------------------------------------------------------
@@ -98,7 +98,7 @@ module "container_app" {
       # The middleware reads this value to reject requests that bypass Front Door.
       # ---------------------------------------------------------------------------
       "AZURE_FRONT_DOOR_ID" = {
-        value = module.frontdoor.resource_id
+        value = module.frontdoor.id
       }
 
       # ---------------------------------------------------------------------------
@@ -198,8 +198,8 @@ module "container_app" {
   ]
 
   scale = {
-    min_replicas = 1 # Keep at least 1 replica running — prevents false "unavailable" alerts
-    max_replicas = 5
+    min_replicas = 0 # Scale to zero when idle — saves cost for POC
+    max_replicas = 3
     rules = [
       {
         name = "http-scaling"

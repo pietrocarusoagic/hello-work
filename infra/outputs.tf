@@ -59,10 +59,10 @@ output "resource_group_name" {
 
 output "front_door_resource_id" {
   description = "Front Door profile resource ID — injected into Container App as AZURE_FRONT_DOOR_ID for X-Azure-FDID header validation"
-  value       = module.frontdoor.resource_id
+  value       = module.frontdoor.id
 }
 
 output "api_managed_identity_client_id" {
   description = "Client ID of the user-assigned managed identity for the Container App — injected as AZURE_CLIENT_ID"
-  value       = module.api_identity.client_id
+  value       = data.azurerm_user_assigned_identity.api.client_id
 }

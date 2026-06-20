@@ -105,12 +105,9 @@ resource "azurerm_mssql_database" "main" {
   name      = "hellowork"
   server_id = azurerm_mssql_server.main.id
 
-  # S2 (50 DTU) — roughly equivalent in cost to the PostgreSQL B2ms originally specified.
-  # Supports ~170 concurrent connections; adequate for 1,000 internal users.
-  sku_name = "S2"
-
-  # 7-day point-in-time restore window (matches architecture doc §8.2 RPO target)
-  zone_redundant = false
+  # Basic (5 DTU) — cheapest tier, sufficient for POC.
+  # zone_redundant is not supported on Basic SKU — omitted intentionally.
+  sku_name = "Basic"
 
   tags = local.common_tags
 }
@@ -141,4 +138,16 @@ resource "azurerm_private_endpoint" "sql" {
   }
 
   tags = local.common_tags
+}
+
+# ---------------------------------------------------------------------------
+# Data source for the user-assigned identity
+# ---------------------------------------------------------------------------
+# Reads back client_id directly from Azure — guaranteed to work regardless
+# of whether the AGIC module exposes client_id as an output.
+# ---------------------------------------------------------------------------
+data "azurerm_user_assigned_identity" "api" {
+  name                = "id-hellowork-api"
+  resource_group_name = azurerm_resource_group.main.name
+  depends_on          = [module.api_identity]
 }
