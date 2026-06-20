@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { PublicClientApplication } from '@azure/msal-browser'
 import { MsalProvider } from '@azure/msal-react'
 import { msalConfig } from './lib/msalConfig'
+import { ThemeProvider } from './lib/theme'
 import App from './App'
 import './index.css'
 
@@ -19,7 +20,9 @@ async function bootstrap() {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <MsalProvider instance={msalInstance}>
-        <App />
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
       </MsalProvider>
     </StrictMode>,
   )
