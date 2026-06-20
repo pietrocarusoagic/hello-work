@@ -17,12 +17,8 @@ module "keyvault" {
   subnet_id                  = module.vnet.subnet_ids["snet-pe"]
   private_dns_zone_id        = module.dns_keyvault.id
 
-  enable_purge_protection    = true # Production: must be enabled; cannot be reverted
+  enable_purge_protection    = true
   soft_delete_retention_days = 7
-
-  diagnostic_settings = {
-    log_analytics_workspace_id = module.law.id
-  }
 
   tags = local.common_tags
 }

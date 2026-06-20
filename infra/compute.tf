@@ -210,16 +210,11 @@ module "container_app" {
     ]
   }
 
-  diagnostic_settings = {
-    log_analytics_workspace_id = module.law.id
-  }
-
   tags = local.common_tags
 }
 
 # ---------------------------------------------------------------------------
-# Static Web App — React SPA (Free tier)
-# ---------------------------------------------------------------------------
+# Static Web App
 # Free tier is always publicly accessible — no mechanism to restrict to
 # Front Door only. This is acceptable because the SPA is static HTML/JS and
 # contains no sensitive server-side logic. All sensitive operations go

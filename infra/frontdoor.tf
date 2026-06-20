@@ -121,9 +121,5 @@ module "frontdoor" {
     ]
   }
 
-  diagnostic_settings = {
-    log_analytics_workspace_id = module.law.id
-  }
-
   tags = local.common_tags
 }
