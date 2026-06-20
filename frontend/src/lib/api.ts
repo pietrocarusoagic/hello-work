@@ -958,7 +958,22 @@ const MOCK_EXTRA_MATCHES: WorkMatchCard[] = [
 ]
 
 
-// In-memory mutable state for group membership (survives component re-renders)
+// All 53 mock users combined — used for dynamic cluster computation
+const ALL_MOCK_USERS: UserProfile[] = [MOCK_GIULIA, MOCK_MARCO, MOCK_SARA, ...MOCK_EXTRA_USERS]
+
+// Coordinates lookup by officeLocation (lng, lat — GeoJSON order)
+const OFFICE_COORDINATES: Record<string, [number, number]> = {
+  Milano: [9.1859, 45.4654],
+  Roma:   [12.4964, 41.9028],
+  Torino: [7.6869, 45.0703],
+}
+
+// All unique interests+hobbies across all users, sorted alphabetically
+const ALL_INTERESTS: string[] = Array.from(
+  new Set(ALL_MOCK_USERS.flatMap((u) => [...u.hobbies, ...u.interests])),
+).sort((a, b) => a.localeCompare(b, 'it'))
+
+
 const groupMembershipState: Record<string, boolean> = {
   'group-1': true,
   'group-2': false,
@@ -1075,9 +1090,36 @@ function mockRequest<T>(path: string, options?: RequestInit): Promise<T> {
     return Promise.resolve({ success: true } as T)
   }
 
-  // GET /map/clusters
+  // GET /map/interests
+  if (method === 'GET' && basePath === '/map/interests') {
+    return Promise.resolve(ALL_INTERESTS as T)
+  }
+
+  // GET /map/clusters (with optional ?interest= filter)
   if (method === 'GET' && basePath === '/map/clusters') {
-    return Promise.resolve(MOCK_MAP_CLUSTERS as T)
+    const interest = params.get('interest') ?? ''
+    if (!interest) {
+      return Promise.resolve(MOCK_MAP_CLUSTERS as T)
+    }
+    const lower = interest.toLowerCase()
+    const filtered = ALL_MOCK_USERS.filter(
+      (u) =>
+        u.hobbies.some((h) => h.toLowerCase() === lower) ||
+        u.interests.some((i) => i.toLowerCase() === lower),
+    )
+    // Group by officeLocation, only include locations with known coordinates
+    const countByLocation: Record<string, number> = {}
+    for (const u of filtered) {
+      countByLocation[u.officeLocation] = (countByLocation[u.officeLocation] ?? 0) + 1
+    }
+    const clusters = Object.entries(countByLocation)
+      .filter(([loc]) => OFFICE_COORDINATES[loc])
+      .map(([loc, count]) => ({
+        officeLocation: loc,
+        coordinates: OFFICE_COORDINATES[loc],
+        userCount: count,
+      }))
+    return Promise.resolve(clusters as T)
   }
 
   // Fallback — should not happen in demo flow
