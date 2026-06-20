@@ -89,5 +89,11 @@ module "frontdoor" {
     }
   }
 
+  waf = {
+    name          = "wafpolhellowork"
+    mode          = "Prevention"
+    managed_rules = []
+  }
+
   tags = local.common_tags
 }
