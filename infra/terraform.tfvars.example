@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# terraform.tfvars.example
+# ---------------------------------------------------------------------------
+# Copy to terraform.tfvars (git-ignored) or pass via environment variables.
+# NEVER commit real secrets to source control.
+#
+# CI/CD usage:
+#   terraform apply \
+#     -var="subscription_id=$ARM_SUBSCRIPTION_ID" \
+#     -var="postgres_admin_password=$POSTGRES_ADMIN_PASSWORD" \
+#     -var="github_actions_sp_object_id=$GH_SP_OBJECT_ID" \
+#     -var="alert_email=$ALERT_EMAIL" \
+#     -var="api_image=acr-hellowork.azurecr.io/hellowork-api:$GITHUB_SHA"
+# ---------------------------------------------------------------------------
+
+# Azure subscription ID
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# Azure region (westeurope required for Static Web Apps)
+location = "westeurope"
+
+# Environment context: "development" or "production"
+env = "production"
+
+# PostgreSQL administrator login
+postgres_admin_login = "psqladmin"
+
+# PostgreSQL administrator password (SENSITIVE — inject from GitHub Actions secret)
+# Minimum 12 characters; must include upper, lower, digit, and symbol.
+postgres_admin_password = "CHANGE_ME_Aa1!minimum12chars"
+
+# Object ID of the GitHub Actions service principal
+# Retrieve with: az ad sp show --id <client-id> --query id -o tsv
+github_actions_sp_object_id = "00000000-0000-0000-0000-000000000000"
+
+# Email for monitoring alert notifications
+alert_email = "team@example.com"
+
+# Container image for the API (override in CI/CD pipeline)
+# Default value is used for initial infrastructure deployment.
+api_image = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"

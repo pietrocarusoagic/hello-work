@@ -36,7 +36,7 @@ A single **Azure Front Door Standard** instance with an attached **WAF policy** 
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 14, TypeScript, Tailwind CSS |
+| Frontend | React 19, TypeScript, Vite 6, Tailwind CSS |
 | Backend | FastAPI (Python 3.12) |
 | Database | Azure PostgreSQL Flexible Server |
 | AI / Suggestions | Azure OpenAI — GPT-4o (coffee chat suggestions only) |
@@ -58,7 +58,7 @@ A single **Azure Front Door Standard** instance with an attached **WAF policy** 
 The system is composed of eight logical components with clearly defined responsibilities and interfaces.
 
 **SPA (Frontend)**
-The single-page application is the only user-facing interface. It is built on Next.js 14 and handles rendering of all views: Discovery Home, profile editing, WorkMatch swipe UI, Group pages, Office Map, and Agentic Knowledge Repository. It manages the Azure AD authentication flow via MSAL.js and communicates exclusively with the Backend API over HTTPS. No direct calls to the database, OpenAI, or Azure Maps are made from the browser. All traffic is routed through Front Door.
+The single-page application is the only user-facing interface. It is built with React 19 + Vite 6 and handles rendering of all views: Discovery Home, profile editing, WorkMatch swipe UI, Group pages, Office Map, and Agentic Knowledge Repository. It manages the Azure AD authentication flow via MSAL.js and communicates exclusively with the Backend API over HTTPS. No direct calls to the database, OpenAI, or Azure Maps are made from the browser. All traffic is routed through Front Door. The built static output (`dist/`) is deployed to Azure Static Web Apps via the `azure/static-web-apps-deploy` GitHub Action.
 
 **Edge / WAF Layer**
 Azure Front Door Standard sits in front of both the SPA and the API. It terminates TLS, enforces the WAF policy (Microsoft DefaultRuleSet 2.1 — OWASP 3.2 equivalent), applies rate limiting, and routes requests based on path prefix: `/*` to the Static Web App origin and `/api/*` to the Container App origin. It is the only component with a public IP.
@@ -76,7 +76,7 @@ Implements the bilateral swipe state machine (`/api/workmatch`). It records swip
 Azure PostgreSQL Flexible Server, accessed exclusively by the Backend API via SQLAlchemy and the asyncpg driver. The schema spans six tables (see §2.2). The server is not reachable from the public internet.
 
 **Storage Layer**
-Azure Blob Storage holds user avatar images and any static assets uploaded through the application (e.g., AKR attachments). The Container App accesses the storage account via its system-assigned managed identity — no connection string or SAS token required. A private endpoint is used to keep traffic off the public internet.
+Azure Blob Storage holds user avatar images and any static assets uploaded through the application (e.g., AKR attachments). The Container App accesses the storage account via its user-assigned managed identity — no connection string or SAS token required. A private endpoint is used to keep traffic off the public internet.
 
 **Office Map**
 Azure Maps Gen 2 (S0) provides the tile layer and clustering API for the office map feature. The API key is stored in Key Vault and injected into the Container App at startup. The map renders AGIC office locations (Italy + Tirana) using a static GeoJSON file; people clusters are computed server-side and returned by `GET /api/map/clusters`.
@@ -356,7 +356,7 @@ Azure Subscription
 | Logical Component | Azure Resource | Runtime |
 |---|---|---|
 | Edge / WAF | Azure Front Door Standard + WAF Policy | — |
-| SPA | Azure Static Web Apps (`stapp-hellowork`) | Next.js 14 / TypeScript / Tailwind CSS |
+| SPA | Azure Static Web Apps (`stapp-hellowork`) | React 19 / TypeScript / Vite 6 |
 | Backend API + All Modules | Azure Container App (`ca-hellowork-api`) | Python 3.12 / FastAPI |
 | Data Layer | Azure PostgreSQL Flexible Server (`psql-hellowork`) | PostgreSQL 16 |
 | File Storage | Azure Blob Storage (`st-hellowork`) | — |
@@ -512,30 +512,36 @@ Infrastructure is fully codified in Terraform using the `azurerm` provider. Remo
 
 ```
 infra/
-├── main.tf                        # Provider config, backend block, resource group
-├── variables.tf                   # Input variable declarations
-├── outputs.tf                     # Output values (FQDNs, ACR login server, etc.)
+├── main.tf                        # Provider config, backend block, resource group, locals
+├── variables.tf                   # All input variable declarations
+├── outputs.tf                     # Output values (FQDNs, ACR login server, KV URI, etc.)
 ├── terraform.tfvars.example       # Documented example variable file (no secrets, checked in)
 │
+├── networking.tf                  # VNet (10.0.0.0/16), subnets, private DNS zones
+├── monitoring.tf                  # Log Analytics, Application Insights, Action Group, metric alerts
+├── security.tf                    # Key Vault, Key Vault secrets (DB string, Maps key, APPI conn string)
+├── data.tf                        # User-assigned identity, ACR, Blob Storage, PostgreSQL
+├── compute.tf                     # Container Apps Environment, Container App, Static Web App
+├── ai.tf                          # Azure OpenAI (GPT-4o), Azure Maps
+├── frontdoor.tf                   # Front Door Standard + WAF policy
+├── rbac.tf                        # All azurerm_role_assignment resources
+│
 ├── modules/
-│   ├── networking/                # VNet, subnets, NSGs
-│   ├── frontdoor/                 # Front Door profile, endpoint, origin groups,
-│   │                              #   routing rules, WAF policy
-│   ├── container_apps/            # Container Apps Environment + Container App
-│   ├── container_registry/        # ACR + role assignments
-│   ├── postgresql/                # Flexible Server, delegated subnet, DB
-│   ├── blob_storage/              # Storage Account, containers, private endpoint
-│   ├── maps/                      # Azure Maps resource
-│   ├── openai/                    # Azure OpenAI resource + GPT-4o model deployment
-│   ├── keyvault/                  # Key Vault, private endpoint, secrets
-│   └── monitoring/                # Application Insights + Log Analytics Workspace
+│   ├── openai/                    # Custom: azurerm_cognitive_account + azurerm_cognitive_deployment
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── maps/                      # Custom: azurerm_maps_account (Gen 2 S0)
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
 │
 └── environments/
-    ├── dev.tfvars                 # Development variable overrides
-    └── prod.tfvars                # Production variable overrides
+    ├── dev.tfvars                 # env = "development"
+    └── prod.tfvars                # env = "production"
 ```
 
-Terraform workspaces or separate `.tfvars` files (`dev.tfvars`, `prod.tfvars`) isolate variable values between environment configurations while sharing the same physical infrastructure.
+All AGIC library modules (`AgicCompany/Standard.Terraform-Modules`) are sourced directly with Git version tags — no local wrapper modules. Only `openai` and `maps` require custom local modules because they are not present in the AGIC library.
 
 ### 6.2 GitHub Actions Pipelines
 
@@ -585,7 +591,7 @@ steps:
   2. Setup Node.js 22
   3. npm ci
   4. npm run lint && npm run type-check
-  5. npm run build          (Next.js outputs to .next/ — Static Web Apps handles SSG/SSR)
+  5. npm run build          (Vite outputs static files to dist/)
   6. Deploy to Azure Static Web Apps (azure/static-web-apps-deploy action)
 ```
 
