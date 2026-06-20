@@ -37,10 +37,6 @@ module "acr" {
   enable_private_endpoint = false # Basic SKU does not support PE
   enable_public_access    = true  # Container App pulls via public endpoint + MI auth
 
-  diagnostic_settings = {
-    log_analytics_workspace_id = module.law.id
-  }
-
   tags = local.common_tags
 }
 
