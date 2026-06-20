@@ -74,6 +74,7 @@ using (var scope = app.Services.CreateScope())
     {
         var seedUsers = new List<User>
         {
+            // demo-user-1: utente esistente con profilo completo (scenario "existing")
             new()
             {
                 AadOid = "demo-user-1",
@@ -115,6 +116,30 @@ using (var scope = app.Services.CreateScope())
                 AiTools = ["Copilot", "Claude"],
                 Hobbies = ["Yoga", "Fotografia"],
                 Interests = ["Arte", "Viaggi"]
+            },
+            new()
+            {
+                AadOid = "demo-user-4",
+                DisplayName = "Andrea Ferretti",
+                Email = "andrea.ferretti@example.com",
+                OfficeLocation = "Milano",
+                Role = "DevOps Engineer",
+                Department = "Platform Engineering",
+                Skills = ["Azure", "Kubernetes", "Terraform"],
+                AiTools = ["Copilot", "Azure OpenAI"],
+                Interests = ["Montagna", "Jazz"]
+            },
+            new()
+            {
+                AadOid = "demo-user-5",
+                DisplayName = "Elena Martini",
+                Email = "elena.martini@example.com",
+                OfficeLocation = "Milano",
+                Role = "Business Development Manager",
+                Department = "Sales",
+                Skills = ["TypeScript", "Comunicazione", "CRM"],
+                AiTools = ["Copilot"],
+                Interests = ["Viaggi", "Running"]
             }
         };
 
@@ -159,6 +184,17 @@ using (var scope = app.Services.CreateScope())
             new GroupMember { GroupId = groups[1].Id, UserId = seedUsers[0].Id },
             new GroupMember { GroupId = groups[1].Id, UserId = seedUsers[1].Id },
             new GroupMember { GroupId = groups[2].Id, UserId = seedUsers[2].Id }
+        );
+        await dbCtx.SaveChangesAsync();
+
+        // Match per lo scenario "utente esistente" (demo-user-1 = Giulia Rossi):
+        //   - 2 match attivi (connected / coffee_scheduled)
+        //   - 2 match da verificare (pending)
+        dbCtx.Matches.AddRange(
+            new Match { UserAId = seedUsers[0].Id, UserBId = seedUsers[1].Id, MatchScore = 0.82, Status = "connected" },
+            new Match { UserAId = seedUsers[0].Id, UserBId = seedUsers[2].Id, MatchScore = 0.71, Status = "coffee_scheduled" },
+            new Match { UserAId = seedUsers[0].Id, UserBId = seedUsers[3].Id, MatchScore = 0.65, Status = "pending" },
+            new Match { UserAId = seedUsers[0].Id, UserBId = seedUsers[4].Id, MatchScore = 0.58, Status = "pending" }
         );
         await dbCtx.SaveChangesAsync();
     }

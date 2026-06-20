@@ -8,7 +8,11 @@ namespace HelloWork.Api.Infrastructure;
 /// <summary>
 /// Dev-only auth handler. Bypasses JWT validation when ASPNETCORE_ENVIRONMENT=Development
 /// and AzureAd:TenantId is set to "dev-bypass".
-/// Auto-authenticates as the first seed user (OID: demo-user-1).
+///
+/// Legge l'header X-Dev-User per scegliere l'identità fittizia:
+///   "new"      → demo-new-1  (nuovo utente, primo accesso)
+///   "existing" → demo-user-1 (utente censito con match attivi)  ← default
+///
 /// NEVER use in production.
 /// </summary>
 public class DevBypassAuthHandler(
@@ -21,12 +25,18 @@ public class DevBypassAuthHandler(
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        var devUser = Context.Request.Headers["X-Dev-User"].FirstOrDefault() ?? "existing";
+
+        var (oid, name, email) = devUser == "new"
+            ? ("demo-new-1", "Luca Ferrari", "luca.ferrari@hellowork.local")
+            : ("demo-user-1", "Giulia Rossi", "giulia.rossi@example.com");
+
         var claims = new[]
         {
-            new Claim("oid", "demo-user-1"),
-            new Claim(ClaimTypes.NameIdentifier, "demo-user-1"),
-            new Claim(ClaimTypes.Name, "Demo User"),
-            new Claim(ClaimTypes.Email, "demo@hellowork.local"),
+            new Claim("oid", oid),
+            new Claim(ClaimTypes.NameIdentifier, oid),
+            new Claim(ClaimTypes.Name, name),
+            new Claim(ClaimTypes.Email, email),
         };
 
         var identity = new ClaimsIdentity(claims, SchemeName);

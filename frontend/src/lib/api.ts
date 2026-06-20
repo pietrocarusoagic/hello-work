@@ -1,6 +1,6 @@
 import { msalInstance } from '../main'
 import { loginRequest } from './msalConfig'
-import { DEV_BYPASS } from './devBypass'
+import { DEV_BYPASS, getDevUserType } from './devBypass'
 
 const BASE_URL = '/api'
 
@@ -19,6 +19,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
+      ...(DEV_BYPASS ? { 'X-Dev-User': getDevUserType() } : {}),
       ...options?.headers,
     },
   })

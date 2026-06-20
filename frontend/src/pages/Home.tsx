@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMsal } from '@azure/msal-react'
 import { api, UserProfile, WorkMatchCard } from '../lib/api'
-import { DEV_BYPASS, DEV_MOCK_ACCOUNT } from '../lib/devBypass'
+import { DEV_BYPASS, getDevMockAccount } from '../lib/devBypass'
 import ProfileCompleteness from '../components/ProfileCompleteness'
 
 export default function Home() {
@@ -41,7 +41,7 @@ export default function Home() {
   }
 
   const userName = DEV_BYPASS
-    ? DEV_MOCK_ACCOUNT.name
+    ? getDevMockAccount().name
     : (accounts[0]?.name ?? 'Collega')
 
   if (loading) {

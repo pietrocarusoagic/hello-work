@@ -8,6 +8,7 @@ import Profile from './pages/Profile'
 import WorkMatch from './pages/WorkMatch'
 import Groups from './pages/Groups'
 import Map from './pages/Map'
+import DebugLogin, { DebugLoginSelector } from './pages/DebugLogin'
 import NavBar from './components/NavBar'
 import { api } from './lib/api'
 
@@ -48,6 +49,13 @@ export default function App() {
       {isAuthenticated && <NavBar />}
       <Routes>
         <Route path="/login" element={DEV_BYPASS ? <Navigate to="/" replace /> : <Login />} />
+        {DEV_BYPASS && (
+          <>
+            <Route path="/debug/login" element={<DebugLoginSelector />} />
+            <Route path="/debug/login/existing" element={<DebugLogin userType="existing" />} />
+            <Route path="/debug/login/new" element={<DebugLogin userType="new" />} />
+          </>
+        )}
         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
