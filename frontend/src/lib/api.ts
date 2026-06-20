@@ -96,9 +96,9 @@ const MOCK_MATCH_RESULT: MatchResult = {
 }
 
 const MOCK_MAP_CLUSTERS = [
-  { officeLocation: 'Milano', count: 5, lat: 45.4654, lng: 9.1859 },
-  { officeLocation: 'Roma', count: 3, lat: 41.9028, lng: 12.4964 },
-  { officeLocation: 'Torino', count: 2, lat: 45.0703, lng: 7.6869 },
+  { officeLocation: 'Milano', coordinates: [9.1859, 45.4654] as [number, number], userCount: 5 },
+  { officeLocation: 'Roma',   coordinates: [12.4964, 41.9028] as [number, number], userCount: 3 },
+  { officeLocation: 'Torino', coordinates: [7.6869, 45.0703] as [number, number], userCount: 2 },
 ]
 
 const MOCK_EXTRA_USERS: UserProfile[] = [
@@ -1012,6 +1012,11 @@ function mockRequest<T>(path: string, options?: RequestInit): Promise<T> {
     return Promise.resolve(MOCK_EXTRA_MATCHES as T)
   }
 
+  // GET /workmatch/cards (used by WorkMatch.tsx)
+  if (method === 'GET' && basePath === '/workmatch/cards') {
+    return Promise.resolve(MOCK_EXTRA_MATCHES as T)
+  }
+
   // POST /matches/swipe
   if (method === 'POST' && basePath === '/matches/swipe') {
     let body: Record<string, unknown> = {}
@@ -1023,6 +1028,20 @@ function mockRequest<T>(path: string, options?: RequestInit): Promise<T> {
     const isRightOnMarco =
       body.direction === 'right' && body.targetUserId === 'demo-user-2'
     const result = isRightOnMarco
+      ? { matched: true, matchId: 'match-1' }
+      : { matched: false }
+    return Promise.resolve(result as T)
+  }
+
+  // POST /workmatch/swipe (used by WorkMatch.tsx)
+  if (method === 'POST' && basePath === '/workmatch/swipe') {
+    let body: Record<string, unknown> = {}
+    try {
+      body = JSON.parse((options?.body as string) ?? '{}')
+    } catch {
+      // ignore parse errors
+    }
+    const result = body.direction === 'like'
       ? { matched: true, matchId: 'match-1' }
       : { matched: false }
     return Promise.resolve(result as T)
