@@ -49,6 +49,10 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
+        # Local state: each CI run starts with an empty state file.
+        # For the POC, run terraform apply once locally or trigger this
+        # pipeline once. Subsequent runs are idempotent — Terraform will
+        # reconcile existing Azure resources against the desired config.
         run: terraform init
 
       - name: Terraform Validate

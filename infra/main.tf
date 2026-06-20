@@ -8,21 +8,8 @@ terraform {
     }
   }
 
-  # Remote state: Azure Storage Account pre-created outside this stack.
-  # Create manually once:
-  #   az group create -n rg-hellowork-tfstate -l westeurope
-  #   az storage account create -n sthelloworktfstate -g rg-hellowork-tfstate --sku Standard_LRS
-  #   az storage container create -n tfstate --account-name sthelloworktfstate
-  backend "azurerm" {
-    resource_group_name  = "rg-hellowork-tfstate"
-    storage_account_name = "sthelloworktfstate"
-    container_name       = "tfstate"
-    key                  = "hellowork.tfstate"
-    # Authenticate using the same OIDC credentials as the provider.
-    # No storage account key required — the GitHub Actions SP needs
-    # Storage Blob Data Contributor on sthelloworktfstate (one-time manual grant).
-    use_oidc = true
-  }
+  # Local state — sufficient for POC/hackathon single-operator usage.
+  # terraform.tfstate is created in infra/ and is git-ignored.
 }
 
 provider "azurerm" {
@@ -30,8 +17,6 @@ provider "azurerm" {
 
   features {
     key_vault {
-      # false: do NOT permanently purge the vault on destroy — rely on soft-delete.
-      # Changing this to true in a production environment risks irrecoverable secret loss.
       purge_soft_delete_on_destroy    = false
       recover_soft_deleted_key_vaults = true
     }
@@ -47,7 +32,7 @@ data "azurerm_client_config" "current" {}
 # ---------------------------------------------------------------------------
 
 resource "azurerm_resource_group" "main" {
-  name     = "rg-hellowork"
+  name     = "rg-red"
   location = var.location
   tags     = local.common_tags
 }
@@ -59,6 +44,7 @@ resource "azurerm_resource_group" "main" {
 locals {
   common_tags = {
     Project     = "hello-work"
+    Team        = "red"
     Environment = var.env
     ManagedBy   = "Terraform"
   }

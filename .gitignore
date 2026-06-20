@@ -25,6 +25,13 @@ desktop.ini
 
 # Logs
 *.log
+
+# Terraform — local state and sensitive files
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfvars
 /.github/workflows/ci-cd.yml
 /frontend/.vite/deps/_metadata.json
 /frontend/.vite/deps/package.json
