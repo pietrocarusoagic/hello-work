@@ -109,7 +109,7 @@ resource "azurerm_monitor_metric_alert" "container_app_replicas" {
   description         = "Container App has 0 running replicas — service unavailable"
   severity            = 1
   frequency           = "PT1M"
-  window_size         = "PT2M" # Matches architecture doc §7.4 (2 min)
+  window_size         = "PT5M"
 
   criteria {
     metric_namespace = "Microsoft.App/containerApps"
@@ -133,7 +133,7 @@ resource "azurerm_monitor_metric_alert" "kv_access_denied" {
   description         = "Key Vault returned HTTP 403 Forbidden — possible misconfigured RBAC"
   severity            = 2
   frequency           = "PT1M"
-  window_size         = "PT1M" # Matches architecture doc §7.4 (1 min)
+  window_size         = "PT5M"
 
   criteria {
     metric_namespace = "Microsoft.KeyVault/vaults"
