@@ -89,18 +89,5 @@ module "frontdoor" {
     }
   }
 
-  # Prevention mode: blocks matched requests rather than just logging.
-  waf = {
-    name = "wafpolhellowork"
-    mode = "Prevention"
-    managed_rules = [
-      {
-        type    = "Microsoft_DefaultRuleSet"
-        version = "2.1"
-        action  = "Block"
-      }
-    ]
-  }
-
   tags = local.common_tags
 }
