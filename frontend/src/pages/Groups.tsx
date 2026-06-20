@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api, Group } from '../lib/api'
+import GroupChat from '../components/GroupChat'
 
 export default function Groups() {
   const [groups, setGroups] = useState<Group[]>([])
@@ -8,6 +9,7 @@ export default function Groups() {
   const [newDesc, setNewDesc] = useState('')
   const [creating, setCreating] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
 
   useEffect(() => {
     api.get<Group[]>('/groups')
@@ -87,7 +89,15 @@ export default function Groups() {
         <section className="mb-6">
           <h2 className="font-semibold text-white/40 text-xs uppercase tracking-wider mb-3">💡 Suggeriti per te</h2>
           <div className="space-y-3">
-            {suggested.map((g) => <GroupCard key={g.id} group={g} onToggle={handleJoin} />)}
+            {suggested.map((g) => (
+              <GroupCard
+                key={g.id}
+                group={g}
+                onToggle={handleJoin}
+                isSelected={selectedGroupId === g.id}
+                onSelect={(id) => setSelectedGroupId(selectedGroupId === id ? null : id)}
+              />
+            ))}
           </div>
         </section>
       )}
@@ -96,7 +106,15 @@ export default function Groups() {
         <section className="mb-6">
           <h2 className="font-semibold text-white/40 text-xs uppercase tracking-wider mb-3">✅ I tuoi gruppi</h2>
           <div className="space-y-3">
-            {myGroups.map((g) => <GroupCard key={g.id} group={g} onToggle={handleJoin} />)}
+            {myGroups.map((g) => (
+              <GroupCard
+                key={g.id}
+                group={g}
+                onToggle={handleJoin}
+                isSelected={selectedGroupId === g.id}
+                onSelect={(id) => setSelectedGroupId(selectedGroupId === id ? null : id)}
+              />
+            ))}
           </div>
         </section>
       )}
@@ -105,7 +123,15 @@ export default function Groups() {
         <section>
           <h2 className="font-semibold text-white/40 text-xs uppercase tracking-wider mb-3">🔍 Tutti i gruppi</h2>
           <div className="space-y-3">
-            {allOther.map((g) => <GroupCard key={g.id} group={g} onToggle={handleJoin} />)}
+            {allOther.map((g) => (
+              <GroupCard
+                key={g.id}
+                group={g}
+                onToggle={handleJoin}
+                isSelected={selectedGroupId === g.id}
+                onSelect={(id) => setSelectedGroupId(selectedGroupId === id ? null : id)}
+              />
+            ))}
           </div>
         </section>
       )}
@@ -113,34 +139,120 @@ export default function Groups() {
   )
 }
 
-function GroupCard({ group, onToggle }: { group: Group; onToggle: (id: string, isMember: boolean) => void }) {
+function GroupCard({
+  group,
+  onToggle,
+  isSelected,
+  onSelect,
+}: {
+  group: Group
+  onToggle: (id: string, isMember: boolean) => void
+  isSelected: boolean
+  onSelect: (id: string) => void
+}) {
+  const [activeTab, setActiveTab] = useState<'members' | 'chat'>('chat')
+
   return (
-    <div className="bg-agic-card rounded-xl p-4 border border-agic-border">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-white text-sm">{group.name}</h3>
-            {group.isSystemSuggested && <span className="text-xs px-1.5 py-0.5 bg-agic-secondary/20 text-agic-secondary rounded-full border border-agic-secondary/30">AI</span>}
+    <div className="bg-agic-card rounded-xl border border-agic-border overflow-hidden">
+      {/* Card header — click to expand */}
+      <button
+        className="w-full text-left p-4 hover:bg-white/[0.02] transition-colors"
+        onClick={() => onSelect(group.id)}
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-white text-sm">{group.name}</h3>
+              {group.isSystemSuggested && (
+                <span className="text-xs px-1.5 py-0.5 bg-agic-secondary/20 text-agic-secondary rounded-full border border-agic-secondary/30">
+                  AI
+                </span>
+              )}
+              <span className="ml-auto text-white/20 text-xs">{isSelected ? '▲' : '▼'}</span>
+            </div>
+            <p className="text-xs text-white/40 mt-0.5">{group.description}</p>
+            <p className="text-xs text-white/30 mt-1">👥 {group.memberCount} membri</p>
+            <div className="flex flex-wrap gap-1 mt-2">
+              {group.tags.slice(0, 3).map((t) => (
+                <span
+                  key={t}
+                  className="px-1.5 py-0.5 bg-white/5 text-white/50 rounded-full text-xs border border-agic-border"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
           </div>
-          <p className="text-xs text-white/40 mt-0.5">{group.description}</p>
-          <p className="text-xs text-white/30 mt-1">👥 {group.memberCount} membri</p>
-          <div className="flex flex-wrap gap-1 mt-2">
-            {group.tags.slice(0, 3).map((t) => (
-              <span key={t} className="px-1.5 py-0.5 bg-white/5 text-white/50 rounded-full text-xs border border-agic-border">{t}</span>
-            ))}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggle(group.id, group.isMember)
+            }}
+            className={`ml-3 flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              group.isMember
+                ? 'bg-white/10 text-white/60 hover:bg-red-500/20 hover:text-red-400 border border-agic-border'
+                : 'bg-gradient-agic text-white hover:opacity-90'
+            }`}
+          >
+            {group.isMember ? 'Esci' : 'Unisciti'}
+          </button>
+        </div>
+      </button>
+
+      {/* Expanded panel */}
+      {isSelected && (
+        <div className="border-t border-agic-border">
+          {/* Tab bar */}
+          <div className="flex border-b border-agic-border">
+            <TabButton
+              label="💬 Chat"
+              active={activeTab === 'chat'}
+              onClick={() => setActiveTab('chat')}
+            />
+            <TabButton
+              label="👥 Membri"
+              active={activeTab === 'members'}
+              onClick={() => setActiveTab('members')}
+            />
+          </div>
+
+          {/* Tab content */}
+          <div className="p-4">
+            {activeTab === 'chat' && (
+              <GroupChat groupId={group.id} groupName={group.name} />
+            )}
+            {activeTab === 'members' && (
+              <p className="text-white/40 text-xs text-center py-4">
+                👥 {group.memberCount} membri nel gruppo.
+              </p>
+            )}
           </div>
         </div>
-        <button
-          onClick={() => onToggle(group.id, group.isMember)}
-          className={`ml-3 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-            group.isMember
-              ? 'bg-white/10 text-white/60 hover:bg-red-500/20 hover:text-red-400 border border-agic-border'
-              : 'bg-gradient-agic text-white hover:opacity-90'
-          }`}
-        >
-          {group.isMember ? 'Esci' : 'Unisciti'}
-        </button>
-      </div>
+      )}
     </div>
   )
 }
+
+function TabButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px
+        ${active
+          ? 'border-agic-primary text-agic-primary'
+          : 'border-transparent text-white/40 hover:text-white/60'
+        }`}
+    >
+      {label}
+    </button>
+  )
+}
+

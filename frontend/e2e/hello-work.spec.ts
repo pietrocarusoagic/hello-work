@@ -4,6 +4,17 @@ import { test, expect, type Page } from '@playwright/test'
 // Fixtures
 // ---------------------------------------------------------------------------
 
+// Group used by the Group Chat E2E tests (tests 9 & 10)
+const mockGroupWithChat = {
+  id: 'group-chat-e2e',
+  name: 'AI Innovation',
+  description: 'Gruppo per discutere di AI applicata al lavoro',
+  tags: ['AI', 'Innovation'],
+  memberCount: 12,
+  isSystemSuggested: false,
+  isMember: true,
+}
+
 const mockProfile = {
   id: 'demo-user-1',
   displayName: 'Giulia Rossi',
@@ -137,15 +148,16 @@ test.describe('Hello Work E2E', () => {
     await mockAPIs(page)
     await page.goto('/')
 
-    // Page <title>
-    await expect(page).toHaveTitle('Hello Work')
+    // Page <title> — updated to "Hello Work — AGIC" in feat/group-chat
+    await expect(page).toHaveTitle(/Hello Work/)
 
     // NavBar brand text (visible on desktop viewport ≥ 768 px)
-    await expect(page.locator('nav span.text-gradient-agic')).toBeVisible()
-    await expect(page.locator('nav span.text-gradient-agic')).toHaveText('Hello Work')
+    // Two <nav> elements exist (desktop + mobile) — target first nav only
+    await expect(page.locator('nav').first().locator('span.text-gradient-agic')).toBeVisible()
+    await expect(page.locator('nav').first().locator('span.text-gradient-agic')).toHaveText('Hello Work')
 
     // NavBar itself
-    await expect(page.locator('nav')).toBeVisible()
+    await expect(page.locator('nav').first()).toBeVisible()
 
     // Greeting (proves the home page actually loaded)
     await expect(page.locator('h1', { hasText: 'Ciao, Giulia' })).toBeVisible()
@@ -161,7 +173,8 @@ test.describe('Hello Work E2E', () => {
     // Wait for home page to fully render before clicking nav
     await expect(page.locator('h1', { hasText: 'Ciao, Giulia' })).toBeVisible()
 
-    await page.locator('nav').locator('a', { hasText: 'WorkMatch' }).click()
+    // Two nav elements (desktop + mobile) — use first() to target the desktop nav
+    await page.locator('nav').first().locator('a', { hasText: 'WorkMatch' }).click()
     await expect(page).toHaveURL(/\/workmatch/)
   })
 
@@ -174,7 +187,7 @@ test.describe('Hello Work E2E', () => {
 
     await expect(page.locator('h1', { hasText: 'Ciao, Giulia' })).toBeVisible()
 
-    await page.locator('nav').locator('a', { hasText: 'Gruppi' }).click()
+    await page.locator('nav').first().locator('a', { hasText: 'Gruppi' }).click()
     await expect(page).toHaveURL(/\/groups/)
   })
 
@@ -187,8 +200,8 @@ test.describe('Hello Work E2E', () => {
 
     await expect(page.locator('h1', { hasText: 'Ciao, Giulia' })).toBeVisible()
 
-    // "Mappa" link in nav — use exact span text to avoid matching "Mappa Uffici" card
-    await page.locator('nav').locator('span', { hasText: 'Mappa' }).click()
+    // Two nav elements (desktop + mobile) — use the desktop nav's Mappa link
+    await page.locator('nav').first().locator('a', { hasText: 'Mappa' }).click()
     await expect(page).toHaveURL(/\/map/)
   })
 
@@ -241,5 +254,65 @@ test.describe('Hello Work E2E', () => {
     await expect(page.locator('h3', { hasText: 'Pilastro Professionale' })).toBeVisible()
     await expect(page.locator('h3', { hasText: 'Pilastro Agentic' })).toBeVisible()
     await expect(page.locator('h3', { hasText: 'Pilastro Umano' })).toBeVisible()
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 9. Group Chat — tab "💬 Chat" visibile
+  // ──────────────────────────────────────────────────────────────────────────
+  test('9. Groups — tab "💬 Chat" visibile dopo aver cliccato su un gruppo', async ({ page }) => {
+    // Set up base API mocks first, then override /api/groups AFTER (LIFO wins)
+    await mockAPIs(page)
+    await page.route('/api/groups', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([mockGroupWithChat]),
+      }),
+    )
+
+    await page.goto('/groups')
+
+    // Wait for the group card to appear, then click to expand it
+    await expect(page.locator('h3', { hasText: 'AI Innovation' })).toBeVisible()
+    await page
+      .locator('button')
+      .filter({ has: page.locator('h3', { hasText: 'AI Innovation' }) })
+      .click()
+
+    // The "💬 Chat" tab button should now be visible (it is the default active tab)
+    await expect(page.locator('button', { hasText: '💬 Chat' })).toBeVisible()
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 10. Group Chat — invio messaggio appare nel feed
+  // ──────────────────────────────────────────────────────────────────────────
+  test('10. Groups — messaggio inviato appare nel feed della chat', async ({ page }) => {
+    await mockAPIs(page)
+    await page.route('/api/groups', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([mockGroupWithChat]),
+      }),
+    )
+
+    await page.goto('/groups')
+
+    // Expand the group card
+    await expect(page.locator('h3', { hasText: 'AI Innovation' })).toBeVisible()
+    await page
+      .locator('button')
+      .filter({ has: page.locator('h3', { hasText: 'AI Innovation' }) })
+      .click()
+
+    // "💬 Chat" tab is active by default — type a message in the textarea
+    const textarea = page.locator('textarea[placeholder*="Scrivi un messaggio"]')
+    await textarea.fill('Messaggio di test E2E automatico')
+
+    // Click "Invia"
+    await page.locator('button', { hasText: 'Invia' }).click()
+
+    // Message should appear in the feed (DEV_BYPASS appends it to state immediately)
+    await expect(page.locator('text=Messaggio di test E2E automatico')).toBeVisible()
   })
 })

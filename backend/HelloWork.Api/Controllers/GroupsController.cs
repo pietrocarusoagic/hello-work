@@ -1,9 +1,11 @@
 using HelloWork.Api.DTOs;
+using HelloWork.Api.Hubs;
 using HelloWork.Api.Infrastructure;
 using HelloWork.Api.Models;
 using HelloWork.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
@@ -13,7 +15,11 @@ namespace HelloWork.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class GroupsController(AppDbContext db, MatchingService matching) : ControllerBase
+public class GroupsController(
+    AppDbContext db,
+    MatchingService matching,
+    IBotService botService,
+    IHubContext<ChatHub> hubContext) : ControllerBase
 {
     private async Task<User?> GetCurrentUserAsync() =>
         await db.Users.FirstOrDefaultAsync(u =>
@@ -127,5 +133,113 @@ public class GroupsController(AppDbContext db, MatchingService matching) : Contr
             .Select(x => ToDto(x.Group, me.Id));
 
         return Ok(scored);
+    }
+
+    // ── Chat endpoints ───────────────────────────────────────────────────────
+
+    private static MessageDto ToMessageDto(GroupMessage m) => new(
+        m.Id, m.GroupId, m.SenderId, m.SenderDisplayName, m.SenderType,
+        m.Body, JsonSerializer.Deserialize<List<string>>(m.SourceUrlsJson) ?? [], m.CreatedAt);
+
+    /// <summary>GET /api/groups/{id}/messages?page=1&amp;pageSize=20</summary>
+    [HttpGet("{id:guid}/messages")]
+    public async Task<IActionResult> GetMessages(
+        Guid id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        var me = await GetCurrentUserAsync();
+        if (me is null) return Unauthorized();
+
+        var groupExists = await db.Groups.AnyAsync(g => g.Id == id);
+        if (!groupExists) return NotFound();
+
+        var messages = await db.GroupMessages
+            .Where(m => m.GroupId == id)
+            .OrderBy(m => m.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return Ok(messages.Select(ToMessageDto));
+    }
+
+    /// <summary>POST /api/groups/{id}/messages</summary>
+    [HttpPost("{id:guid}/messages")]
+    public async Task<IActionResult> SendMessage(Guid id, [FromBody] SendMessageRequest req)
+    {
+        var me = await GetCurrentUserAsync();
+        if (me is null) return Unauthorized();
+
+        var group = await db.Groups.FindAsync(id);
+        if (group is null) return NotFound();
+
+        if (string.IsNullOrWhiteSpace(req.Body))
+            return BadRequest("Body cannot be empty.");
+
+        var message = new GroupMessage
+        {
+            GroupId = id,
+            SenderId = me.Id,
+            SenderDisplayName = me.DisplayName ?? me.AadOid,
+            SenderType = "user",
+            Body = req.Body.Trim(),
+            SourceUrlsJson = "[]",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        db.GroupMessages.Add(message);
+        await db.SaveChangesAsync();
+
+        var dto = ToMessageDto(message);
+        await hubContext.Clients.Group(id.ToString()).SendAsync("ReceiveMessage", dto);
+
+        return Created($"/api/groups/{id}/messages/{message.Id}", dto);
+    }
+
+    /// <summary>POST /api/groups/{id}/bot-ask</summary>
+    [HttpPost("{id:guid}/bot-ask")]
+    public async Task<IActionResult> BotAsk(Guid id, [FromBody] BotAskRequest req)
+    {
+        var me = await GetCurrentUserAsync();
+        if (me is null) return Unauthorized();
+
+        var group = await db.Groups.FindAsync(id);
+        if (group is null) return NotFound();
+
+        var tags = JsonSerializer.Deserialize<List<string>>(group.TagsJson) ?? [];
+
+        // Fetch recent history (last 10 messages)
+        var history = await db.GroupMessages
+            .Where(m => m.GroupId == id)
+            .OrderByDescending(m => m.CreatedAt)
+            .Take(10)
+            .OrderBy(m => m.CreatedAt)
+            .ToListAsync();
+
+        var prompt = string.IsNullOrWhiteSpace(req.Prompt)
+            ? "Stimola la conversazione del gruppo con un messaggio coinvolgente."
+            : req.Prompt;
+
+        var botReply = await botService.GetOnDemandReply(
+            id, group.Name, prompt, tags, history);
+
+        var message = new GroupMessage
+        {
+            GroupId = id,
+            SenderDisplayName = "HelloWork Bot",
+            SenderType = "bot",
+            Body = botReply,
+            SourceUrlsJson = "[]",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        db.GroupMessages.Add(message);
+        await db.SaveChangesAsync();
+
+        var dto = ToMessageDto(message);
+        await hubContext.Clients.Group(id.ToString()).SendAsync("ReceiveMessage", dto);
+
+        return Ok(dto);
     }
 }

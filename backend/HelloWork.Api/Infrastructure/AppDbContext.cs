@@ -10,6 +10,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Match> Matches => Set<Match>();
     public DbSet<Group> Groups => Set<Group>();
     public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
+    public DbSet<GroupMessage> GroupMessages => Set<GroupMessage>();
+    public DbSet<BotSchedule> BotSchedules => Set<BotSchedule>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +50,33 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .WithMany()
             .HasForeignKey(gm => gm.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // GroupMessage: restrict cascade to avoid multi-path issue with User FK
+        modelBuilder.Entity<GroupMessage>()
+            .HasOne(gm => gm.Group)
+            .WithMany()
+            .HasForeignKey(gm => gm.GroupId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GroupMessage>()
+            .HasOne(gm => gm.Sender)
+            .WithMany()
+            .HasForeignKey(gm => gm.SenderId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<GroupMessage>()
+            .HasIndex(gm => new { gm.GroupId, gm.CreatedAt });
+
+        // BotSchedule: one schedule per group
+        modelBuilder.Entity<BotSchedule>()
+            .HasOne(bs => bs.Group)
+            .WithMany()
+            .HasForeignKey(bs => bs.GroupId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<BotSchedule>()
+            .HasIndex(bs => bs.GroupId)
+            .IsUnique();
 
         modelBuilder.Entity<Match>()
             .HasOne(m => m.UserA)
