@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react'
-import * as atlas from 'azure-maps-control'
-import 'azure-maps-control/dist/atlas.min.css'
+import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
 
 interface OfficeCluster {
   officeLocation: string
@@ -12,59 +11,42 @@ interface Props {
   clusters: OfficeCluster[]
 }
 
-const AZURE_MAPS_KEY = import.meta.env.VITE_AZURE_MAPS_KEY || ''
-
 export default function OfficeMap({ clusters }: Props) {
-  const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstance = useRef<atlas.Map | null>(null)
-
-  useEffect(() => {
-    if (!mapRef.current || !AZURE_MAPS_KEY) return
-
-    mapInstance.current = new atlas.Map(mapRef.current, {
-      center: [12.4964, 41.9028],
-      zoom: 5,
-      authOptions: {
-        authType: atlas.AuthenticationType.subscriptionKey,
-        subscriptionKey: AZURE_MAPS_KEY,
-      },
-    })
-
-    mapInstance.current.events.add('ready', () => {
-      if (!mapInstance.current) return
-
-      const datasource = new atlas.source.DataSource()
-      mapInstance.current.sources.add(datasource)
-
-      clusters.forEach((c) => {
-        const point = new atlas.data.Feature(
-          new atlas.data.Point(c.coordinates),
-          { location: c.officeLocation, count: c.userCount },
-        )
-        datasource.add(point)
-      })
-
-      mapInstance.current.layers.add(
-        new atlas.layer.BubbleLayer(datasource, undefined, {
-          radius: ['interpolate', ['linear'], ['get', 'count'], 1, 8, 50, 24],
-          color: '#3b82f6',
-          strokeColor: 'white',
-          strokeWidth: 2,
-          opacity: 0.8,
-        }),
-      )
-    })
-
-    return () => mapInstance.current?.dispose()
-  }, [clusters])
-
-  if (!AZURE_MAPS_KEY) {
-    return (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm px-4 text-center">
-        Configura VITE_AZURE_MAPS_KEY per visualizzare la mappa.
-      </div>
-    )
-  }
-
-  return <div ref={mapRef} className="w-full h-full rounded-xl overflow-hidden" />
+  return (
+    <MapContainer
+      center={[42.5, 12.5]}
+      zoom={5}
+      scrollWheelZoom={false}
+      style={{ width: '100%', height: '100%', borderRadius: '0.75rem' }}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      {clusters.map((c) => (
+        <CircleMarker
+          key={c.officeLocation}
+          center={[c.coordinates[1], c.coordinates[0]]}
+          radius={Math.max(10, Math.min(28, 8 + c.userCount * 2))}
+          pathOptions={{
+            color: '#ffffff',
+            weight: 2,
+            fillColor: '#3b82f6',
+            fillOpacity: 0.85,
+          }}
+        >
+          <Tooltip permanent direction="center" className="cluster-label">
+            {c.userCount}
+          </Tooltip>
+          <Popup>
+            <div style={{ textAlign: 'center', minWidth: 100 }}>
+              <strong>{c.officeLocation}</strong>
+              <br />
+              {c.userCount} {c.userCount === 1 ? 'persona' : 'persone'}
+            </div>
+          </Popup>
+        </CircleMarker>
+      ))}
+    </MapContainer>
+  )
 }

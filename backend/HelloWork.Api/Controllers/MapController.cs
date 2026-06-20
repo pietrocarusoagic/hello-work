@@ -20,25 +20,51 @@ public class MapController(AppDbContext db) : ControllerBase
     };
 
     [HttpGet("clusters")]
-    public async Task<IActionResult> GetClusters()
+    public async Task<IActionResult> GetClusters([FromQuery] string? interest = null)
     {
-        var data = await db.Users
+        var users = await db.Users
             .Where(u => u.OfficeLocation != null)
-            .GroupBy(u => u.OfficeLocation!)
-            .Select(g => new { OfficeLocation = g.Key, UserCount = g.Count() })
             .ToListAsync();
 
-        var result = data.Select(d =>
+        // Filter in-memory: [NotMapped] Hobbies and Interests cannot be translated to SQL
+        if (!string.IsNullOrWhiteSpace(interest))
         {
-            var coords = OfficeCoordinates.TryGetValue(d.OfficeLocation, out var c) ? c : [0.0, 0.0];
-            return new
+            users = users
+                .Where(u =>
+                    u.Hobbies.Any(h => h.Equals(interest, StringComparison.OrdinalIgnoreCase)) ||
+                    u.Interests.Any(i => i.Equals(interest, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+        }
+
+        var result = users
+            .GroupBy(u => u.OfficeLocation!)
+            .Select(g =>
             {
-                OfficeLocation = d.OfficeLocation,
-                Coordinates = coords,
-                UserCount = d.UserCount,
-            };
-        });
+                var coords = OfficeCoordinates.TryGetValue(g.Key, out var c) ? c : [0.0, 0.0];
+                return new
+                {
+                    OfficeLocation = g.Key,
+                    Coordinates = coords,
+                    UserCount = g.Count(),
+                };
+            });
 
         return Ok(result);
+    }
+
+    [HttpGet("interests")]
+    public async Task<IActionResult> GetInterests()
+    {
+        var users = await db.Users.ToListAsync();
+
+        var all = users
+            .SelectMany(u => u.Hobbies.Concat(u.Interests))
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => s.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(s => s)
+            .ToList();
+
+        return Ok(all);
     }
 }
