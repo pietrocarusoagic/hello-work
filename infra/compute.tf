@@ -190,13 +190,6 @@ module "container_app" {
   # (Key Vault, OpenAI, Blob Storage) without credentials in env vars.
   user_assigned_identity_ids = [module.api_identity.id]
 
-  registries = [
-    {
-      server   = module.acr.login_server
-      identity = module.api_identity.id
-    }
-  ]
-
   scale = {
     min_replicas = 0 # Scale to zero when idle — saves cost for POC
     max_replicas = 3
