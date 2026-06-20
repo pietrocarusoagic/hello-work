@@ -18,7 +18,8 @@ export default function NavBar() {
   const { theme, toggle } = useTheme()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-agic-card border-t border-agic-border z-50 md:top-0 md:bottom-auto md:border-b md:border-t-0">
+    <>
+    <nav className="hidden md:block fixed top-0 left-0 right-0 bg-agic-card border-b border-agic-border z-50">
       <div className="max-w-5xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <span className="hidden md:flex items-center gap-2 text-xl font-bold">
@@ -71,7 +72,8 @@ export default function NavBar() {
             )}
           </div>
         </div>
-      </nav>
+      </div>
+    </nav>
 
       {/* Mobile bottom bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-agic-card border-t border-gray-100 dark:border-agic-border transition-colors duration-200">
