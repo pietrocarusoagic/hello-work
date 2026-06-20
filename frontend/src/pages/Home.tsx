@@ -90,36 +90,6 @@ export default function Home() {
         </div>
       ) : (
         <>
-          {profile && <div className="mb-6"><ProfileCompleteness score={profile.profileScore} /></div>}
-
-          <div className="grid grid-cols-2 gap-3 mb-8">
-            {[
-              { to: '/workmatch', emoji: '❤️', label: 'WorkMatch', desc: 'Scopri colleghi compatibili' },
-              { to: '/groups', emoji: '👥', label: 'Gruppi', desc: 'Comunità di interesse' },
-              { to: '/map', emoji: '📍', label: 'Mappa Uffici', desc: 'Chi è dove' },
-              { to: '/profile', emoji: '✏️', label: 'Il mio profilo', desc: 'Completa il tuo profilo' },
-            ].map(({ to, emoji, label, desc }) => (
-              <Link
-                key={s.id}
-                to={`/profile/${s.id}`}
-                className="bg-agic-card rounded-xl p-4 border border-agic-border flex items-center gap-3 hover:border-agic-primary/30 transition-all"
-              >
-                {s.avatarUrl ? (
-                  <img src={s.avatarUrl} alt={s.displayName} className="w-10 h-10 rounded-full" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-agic-primary/20 flex items-center justify-center font-bold text-agic-primary">
-                    {s.displayName.charAt(0)}
-                  </div>
-                )}
-                <div className="flex-1">
-                  <div className="font-medium text-sm text-white">{s.displayName}</div>
-                  <div className="text-xs text-white/40">{s.role}</div>
-                </div>
-                <div className="text-sm font-bold text-gradient-agic">{Math.round(s.matchScore * 100)}%</div>
-              </Link>
-            ))}
-          </div>
-
           {suggestions.length > 0 && (
             <div>
               <h2 className="font-semibold text-gray-700 dark:text-white/70 mb-3 text-sm">Persone che potresti conoscere</h2>
