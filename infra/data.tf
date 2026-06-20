@@ -63,7 +63,7 @@ module "storage" {
   account_replication_type = "LRS"
   access_tier              = "Hot"
 
-  enable_private_endpoint      = true
+  enable_private_endpoints     = true
   enable_blob_private_endpoint = true
   subnet_id                    = module.vnet.subnet_ids["snet-pe"]
   private_dns_zone_ids = {
@@ -71,10 +71,6 @@ module "storage" {
   }
 
   shared_access_key_enabled = false # Managed identity only
-
-  diagnostic_settings = {
-    log_analytics_workspace_id = module.law.id
-  }
 
   tags = local.common_tags
 }
