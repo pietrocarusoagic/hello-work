@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -19,6 +20,8 @@
   --agic-secondary: #EB5E2D;
   --agic-dark: #121320;
   --agic-card: #1a1b2e;
+  --agic-border-dark: #252639;
+  --radius: 0.5rem;
 }
 
 body {
@@ -26,14 +29,39 @@ body {
   color: #ffffff;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.025em;
+  font-weight: 700;
 }
 
 @layer utilities {
-  .text-gradient-agic {
+  /* Gradient text — matches agic.it heading highlights */
+  .text-gradient-agic,
+  .gradient-text {
     background: linear-gradient(90deg, #DC0278 0%, #EB5E2D 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Gradient background — for avatars, badges, buttons */
+  .gradient-bg {
+    background: linear-gradient(135deg, #DC0278 0%, #EB5E2D 100%);
+  }
+
+  /* bg-gradient-highlight — matches agic.it text highlight direction */
+  .bg-gradient-highlight {
+    background: linear-gradient(90deg, #EB5E2D 0%, #DC0278 100%);
+  }
+
+  /* Standard card — dark surface with subtle border */
+  .card {
+    background-color: #1a1b2e;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
   }
 
   .border-agic {
