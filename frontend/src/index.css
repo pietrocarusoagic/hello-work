@@ -4,6 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
+.cluster-label {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-weight: bold;
+  font-size: 13px;
+  color: white;
+}
+
 :root {
   --agic-primary: #DC0278;
   --agic-secondary: #EB5E2D;

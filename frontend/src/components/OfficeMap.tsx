@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 
 interface OfficeCluster {
@@ -35,6 +35,9 @@ export default function OfficeMap({ clusters }: Props) {
             fillOpacity: 0.85,
           }}
         >
+          <Tooltip permanent direction="center" className="cluster-label">
+            {c.userCount}
+          </Tooltip>
           <Popup>
             <div style={{ textAlign: 'center', minWidth: 100 }}>
               <strong>{c.officeLocation}</strong>
