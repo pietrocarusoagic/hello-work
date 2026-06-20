@@ -1,6 +1,11 @@
 variable "name" {
   type        = string
-  description = "Azure Maps account name (full CAF-compliant, e.g. maps-hellowork)"
+  description = "Azure Maps account name"
+}
+
+variable "location" {
+  type        = string
+  description = "Azure region"
 }
 
 variable "resource_group_name" {
@@ -10,6 +15,5 @@ variable "resource_group_name" {
 
 variable "tags" {
   type        = map(string)
-  description = "Tags to apply to all resources in this module"
   default     = {}
 }
