@@ -40,7 +40,7 @@ module "appi" {
   sampling_percentage           = 100
   internet_ingestion_enabled    = true
   internet_query_enabled        = true
-  local_authentication_disabled = true # Production: managed identity only
+  local_authentication_disabled = false # Connection-string ingestion — simpler for POC
 
   tags = local.common_tags
 }
@@ -48,7 +48,7 @@ module "appi" {
 # The AGIC application-insights module does not expose connection_string as
 # an output. Retrieve it via data source after the resource is provisioned.
 data "azurerm_application_insights" "appi" {
-  name                = module.appi.name
+  name                = "appi-hellowork"
   resource_group_name = azurerm_resource_group.main.name
   depends_on          = [module.appi]
 }
@@ -102,7 +102,6 @@ resource "azurerm_monitor_metric_alert" "sql_cpu" {
 }
 
 # Container App — zero replicas running for more than 2 minutes (Sev 1)
-# Note: min_replicas = 1 prevents false alerts during off-hours.
 resource "azurerm_monitor_metric_alert" "container_app_replicas" {
   name                = "alert-hellowork-api-no-replicas"
   resource_group_name = azurerm_resource_group.main.name
@@ -153,52 +152,4 @@ resource "azurerm_monitor_metric_alert" "kv_access_denied" {
   action {
     action_group_id = module.action_group.id
   }
-}
-
-# ---------------------------------------------------------------------------
-# OpenAI latency alert — Log Analytics scheduled query
-# ---------------------------------------------------------------------------
-# The Cognitive Services metric namespace does not expose a percentile latency
-# metric. The correct approach is a KQL query over Application Insights
-# dependency traces — this fires when p95 duration for OpenAI calls exceeds
-# the 15-second threshold defined in architecture doc §7.4.
-# ---------------------------------------------------------------------------
-
-resource "azurerm_monitor_scheduled_query_rules_alert_v2" "openai_latency" {
-  name                = "alert-hellowork-openai-latency"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = var.location
-  description         = "Azure OpenAI p95 dependency latency above 15s — coffee chat suggestions may be slow"
-  severity            = 3
-
-  evaluation_frequency = "PT5M"
-  window_duration      = "PT10M"
-
-  # Scope: the Log Analytics workspace that backs Application Insights
-  scopes = [module.law.id]
-
-  criteria {
-    query = <<-KQL
-      dependencies
-      | where cloud_RoleName == "ca-hellowork-api"
-      | where type == "HTTP" and (target contains "openai" or target contains "aoai-hellowork")
-      | summarize p95_duration = percentile(duration, 95) by bin(timestamp, 5m)
-      | where p95_duration > 15000
-    KQL
-
-    time_aggregation_method = "Count"
-    operator                = "GreaterThan"
-    threshold               = 0
-
-    failing_periods {
-      minimum_failing_periods_to_trigger_alert = 1
-      number_of_evaluation_periods             = 1
-    }
-  }
-
-  action {
-    action_groups = [module.action_group.id]
-  }
-
-  tags = local.common_tags
 }

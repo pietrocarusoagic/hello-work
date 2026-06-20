@@ -27,7 +27,7 @@ locals {
 }
 
 module "frontdoor" {
-  source = "git::https://github.com/AgicCompany/Standard.Terraform-Modules.git//modules/front-door?ref=front-door/v1.2.0"
+  source = "git::https://github.com/AgicCompany/Standard.Terraform-Modules.git//modules/front-door?ref=front-door/v1.1.0"
 
   resource_group_name = azurerm_resource_group.main.name
   name                = "afd-hellowork"
@@ -90,7 +90,6 @@ module "frontdoor" {
   }
 
   # Prevention mode: blocks matched requests rather than just logging.
-  # custom_rules requires front-door module v1.2.0+.
   waf = {
     name = "wafpol-hellowork"
     mode = "Prevention"
@@ -99,24 +98,6 @@ module "frontdoor" {
         type    = "Microsoft_DefaultRuleSet"
         version = "2.1"
         action  = "Block"
-      }
-    ]
-    custom_rules = [
-      {
-        name                           = "RateLimitPerIp"
-        priority                       = 100
-        rule_type                      = "RateLimitRule"
-        action                         = "Block"
-        rate_limit_duration_in_minutes = 1
-        rate_limit_threshold           = 100 # max 100 req/min per client IP (architecture doc §4.2)
-        match_conditions = [
-          {
-            match_variable = "RemoteAddr"
-            operator       = "IPMatch"
-            match_values   = ["0.0.0.0/0"] # Applies to all IPs
-            negation_condition = false
-          }
-        ]
       }
     ]
   }
