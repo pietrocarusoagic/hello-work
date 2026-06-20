@@ -1,6 +1,6 @@
 import { msalInstance } from '../main'
 import { loginRequest } from './msalConfig'
-import { DEV_BYPASS } from './devBypass'
+import { DEV_BYPASS, getDebugUserMeta } from './devBypass'
 
 const BASE_URL = '/api'
 
@@ -14,11 +14,16 @@ async function getToken(): Promise<string> {
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const token = await getToken()
+  const debugHeaders: Record<string, string> = DEV_BYPASS
+    ? { 'X-Debug-User': getDebugUserMeta().backendOid }
+    : {}
+
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
+      ...debugHeaders,
       ...options?.headers,
     },
   })

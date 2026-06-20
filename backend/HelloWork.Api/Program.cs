@@ -63,11 +63,6 @@ using (var scope = app.Services.CreateScope())
 {
     var dbCtx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    if (app.Environment.IsDevelopment())
-    {
-        // In dev: ricrea il DB da zero ad ogni avvio per garantire schema pulito
-        dbCtx.Database.EnsureDeleted();
-    }
     dbCtx.Database.EnsureCreated();
 
     if (!dbCtx.Users.Any())
@@ -115,6 +110,21 @@ using (var scope = app.Services.CreateScope())
                 AiTools = ["Copilot", "Claude"],
                 Hobbies = ["Yoga", "Fotografia"],
                 Interests = ["Arte", "Viaggi"]
+            },
+            // ⚠️ DEV ONLY — nuovo utente al primo accesso, nessun profilo compilato
+            new()
+            {
+                AadOid = "demo-user-new",
+                DisplayName = "Luca Verdi",
+                Email = "luca.verdi@example.com",
+                OfficeLocation = null,
+                Role = null,
+                Department = null,
+                Skills = [],
+                Certifications = [],
+                AiTools = [],
+                Hobbies = [],
+                Interests = []
             }
         };
 
@@ -159,6 +169,29 @@ using (var scope = app.Services.CreateScope())
             new GroupMember { GroupId = groups[1].Id, UserId = seedUsers[0].Id },
             new GroupMember { GroupId = groups[1].Id, UserId = seedUsers[1].Id },
             new GroupMember { GroupId = groups[2].Id, UserId = seedUsers[2].Id }
+        );
+        await dbCtx.SaveChangesAsync();
+
+        // Match seed per demo-user-1 (Giulia Rossi):
+        //   - match con Marco Bianchi → status "connected" (attivo)
+        //   - match con Sara Conti    → status "pending"   (da verificare)
+        dbCtx.Matches.AddRange(
+            new Match
+            {
+                UserAId = seedUsers[0].Id,
+                UserBId = seedUsers[1].Id,
+                MatchScore = 0.72,
+                Status = "connected",
+                CreatedAt = DateTime.UtcNow.AddDays(-10)
+            },
+            new Match
+            {
+                UserAId = seedUsers[0].Id,
+                UserBId = seedUsers[2].Id,
+                MatchScore = 0.55,
+                Status = "pending",
+                CreatedAt = DateTime.UtcNow.AddDays(-2)
+            }
         );
         await dbCtx.SaveChangesAsync();
     }

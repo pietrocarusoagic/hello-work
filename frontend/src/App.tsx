@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useIsAuthenticated } from '@azure/msal-react'
-import { DEV_BYPASS } from './lib/devBypass'
+import { DEV_BYPASS, hasSelectedDebugUser } from './lib/devBypass'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Profile from './pages/Profile'
@@ -9,12 +9,13 @@ import WorkMatch from './pages/WorkMatch'
 import Groups from './pages/Groups'
 import Map from './pages/Map'
 import OnboardingWizard from './pages/OnboardingWizard'
+import DebugLogin from './pages/DebugLogin'
 import NavBar from './components/NavBar'
 import { api, UserProfile } from './lib/api'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const msalAuth = useIsAuthenticated()
-  const isAuthenticated = DEV_BYPASS || msalAuth
+  const isAuthenticated = DEV_BYPASS ? hasSelectedDebugUser() : msalAuth
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 
@@ -29,7 +30,7 @@ function needsOnboarding(profile: UserProfile): boolean {
 
 export default function App() {
   const msalAuth = useIsAuthenticated()
-  const isAuthenticated = DEV_BYPASS || msalAuth
+  const isAuthenticated = DEV_BYPASS ? hasSelectedDebugUser() : msalAuth
   const [bootstrapping, setBootstrapping] = useState(false)
   const [redirectOnboarding, setRedirectOnboarding] = useState(false)
 
@@ -64,7 +65,8 @@ export default function App() {
     <BrowserRouter>
       {isAuthenticated && <NavBar />}
       <Routes>
-        <Route path="/login" element={DEV_BYPASS ? <Navigate to="/" replace /> : <Login />} />
+        <Route path="/login" element={DEV_BYPASS ? <DebugLogin /> : <Login />} />
+        {DEV_BYPASS && <Route path="/debug/:userType" element={<DebugLogin />} />}
         <Route
           path="/"
           element={
