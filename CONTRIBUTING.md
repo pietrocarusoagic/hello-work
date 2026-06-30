@@ -91,3 +91,10 @@ gh pr create --title "feat(scope): descrizione" --body "..."
 | Infrastructure | `infra/` | DevOps agent |
 | Documentation | `docs/` | All (coordinate!) |
 | Presentation | `presentation/` | All |
+
+
+## Process
+
+This project follows the Dream Team Delivery Process. Before implementing any 
+non-atomic feature, verify that a spec/PRD exists in `docs/`. If not, open an issue
+and request one. See `.github/copilot-instructions.md` for details.
